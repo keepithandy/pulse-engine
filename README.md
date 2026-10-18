@@ -1,4 +1,4 @@
-# ⚡ Pulse Engine
+# Pulse Engine
 
 <div align="center">
   <p><strong>A deterministic simulation core for event-driven worlds.</strong></p>
@@ -11,22 +11,22 @@
     <a href="LICENSE"><img src="https://img.shields.io/github/license/keepithandy/pulse-engine?color=blue" alt="MIT license"></a>
   </p>
   <p>
-    <a href="#-quick-start">Quick start</a> ·
-    <a href="#-capabilities">Capabilities</a> ·
-    <a href="#-documentation">Documentation</a>
+    <a href="#quick-start">Quick start</a> ·
+    <a href="#capabilities">Capabilities</a> ·
+    <a href="#documentation">Documentation</a>
   </p>
 </div>
 
 > [!IMPORTANT]
 > **Pulse Engine is pre-alpha.** Its APIs and save formats may change while the engine develops.
 
-## 🌌 What is Pulse Engine?
+## What is Pulse Engine?
 
 Pulse Engine is a framework-independent JavaScript simulation engine for deterministic, event-driven worlds. It provides the reusable machinery for simulation while each game keeps its own story, interface, balance, and content.
 
 **Outpost Zero** is the first separate game planned to use the engine.
 
-## ✨ Capabilities
+## Capabilities
 
 | System | What it provides |
 | --- | --- |
@@ -42,7 +42,7 @@ Pulse Engine is a framework-independent JavaScript simulation engine for determi
 
 The engine is designed to keep the simulation reproducible: dispatching an ordinary action does not advance time, and no wall-clock timer affects simulation behavior.
 
-## 🚀 Quick start
+## Quick start
 
 Pulse Engine currently targets **Node.js 22 or newer**. To work from a local checkout:
 
@@ -62,7 +62,7 @@ node bin/pulse-run.js --scenario scenarios/resource-network.json --ticks 10
 
 The runner writes deterministic JSON to stdout and exits with a nonzero status for invalid input or runtime failures.
 
-## 🧩 Use the world model
+## Use the world model
 
 The generic entity/component world is a plug-in. Consumers define what their components mean and keep their game-specific systems outside the engine.
 
@@ -96,7 +96,7 @@ console.log(workers);
 
 For the complete API contract, including dispatch results, scheduling, snapshots, migrations, plug-in lifecycle, and scenario validation, see [Engine contracts](docs/engine-contracts.md).
 
-## 🧪 Quality checks
+## Quality checks
 
 Run the checks locally:
 
@@ -111,20 +111,20 @@ node tools/browser-check.mjs
 
 GitHub Actions checks Node.js 22 and 24 on Linux, Windows, and macOS. Browser checks cover Chromium and WebKit. Coverage gates require **80% lines**, **85% functions**, and **70% branches**.
 
-## 🧭 Project boundary
+## Project boundary
 
 Pulse Engine owns simulation state, actions, rules, events, scheduling, seeded randomness, snapshots, plug-ins, persistence, and diagnostics.
 
 Games that use it own their story, presentation, balance, and content. This boundary lets the simulation core stay reusable while each game can evolve independently.
 
-## 📚 Documentation
+## Documentation
 
 - [Engine contracts](docs/engine-contracts.md) — API behavior, lifecycle, snapshots, saves, scheduling, diagnostics, and scenarios
 - [Example scenarios](scenarios/) — data-driven inputs for the headless runner
 - [Source](src/) — engine implementation
 - [Tests](test/) — behavioral and compatibility checks
 
-## 📦 Package
+## Package
 
 The package manifest is `@keepithandy/pulse-engine` at **0.1.0-alpha.0**. The package contents can be checked locally with:
 
@@ -137,5 +137,5 @@ That command performs a dry run; it does not publish the package.
 ---
 
 <div align="center">
-  <sub>⚡ Deterministic by design · 🧩 Game-agnostic by default · 🔍 Observable when it matters</sub>
+  <sub>Deterministic by design · Game-agnostic by default · Observable when it matters</sub>
 </div>
