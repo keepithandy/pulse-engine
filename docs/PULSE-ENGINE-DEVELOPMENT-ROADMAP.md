@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Planning status:** proposed work. This review creates the roadmap and its tracking structure. It does not implement the 100 work items or declare them complete.
+> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 is completed and merged**, and the remaining 99 work items are not yet complete.
 
 | Document field | Value |
 | --- | --- |
@@ -22,8 +22,8 @@
 | Reviewed baseline | [`31a8289`](https://github.com/keepithandy/pulse-engine/commit/31a8289875b78fd7bc8363d23e86b9419f0980fc) |
 | Package | `@keepithandy/pulse-engine` |
 | Baseline version | `0.1.0-alpha.0` |
-| Work items completed | **0 / 100** |
-| Recommended starting point | **P01-01 — Make data validation inert** |
+| Work items completed | **1 / 100** |
+| Next work item | **P01-02 — Harden entity identity and lookups** |
 
 ---
 
@@ -141,14 +141,16 @@ A milestone is complete only when its evidence is recorded. Passing the current 
 
 ## Phase 01 — Correctness and boundary hardening
 
-**Status:** not started · **Progress:** 0/8 · **Depends on:** Reviewed baseline
+**Status:** in progress · **Progress:** 1/8 · **Depends on:** Reviewed baseline
 
 **Outcome:** A trustworthy baseline before the public API and feature surface grow.
 
 ### Work items
 
-- [ ] **P01-01 — Make data validation inert.** Validate array property descriptors before reading values; define handling of sparse arrays, symbols, accessors, and unsupported properties.
+- [x] **P01-01 — Make data validation inert.** Validate array property descriptors before reading values; define handling of sparse arrays, symbols, accessors, and unsupported properties.
   - **Done when:** Array getters never execute during validation or copying, and supported values round-trip through saves without silent changes.
+  - **Completed October 17, 2026.** [PR #22](https://github.com/keepithandy/pulse-engine/pull/22) merged into `main` at [`1ed004c`](https://github.com/keepithandy/pulse-engine/commit/1ed004cbe3b929f214e183cceba9002186fc567c). The fix validates array-index descriptors without running getters, rejects data shapes that would not survive JSON faithfully, and documents the supported boundary in `docs/engine-contracts.md`. Nine regression tests cover unsafe fields, no getter execution, unchanged rejected-operation checkpoints, and JSON save/restore.
+  - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/39083857321) passed across Node 22/24 on Ubuntu, Windows and macOS and Chromium/WebKit; CI ran `npm ci`, `npm run lint`, `npm test`, `npm run test:coverage`, `npm run check:package`, `npm run smoke`, and browser checks. [Repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/39083857325) passed. Scope is limited to P01-01; P01-02 through P01-08 remain open.
 
 - [ ] **P01-02 — Harden entity identity and lookups.** Use own-property lookups consistently and define one policy for whitespace and reserved identifiers.
   - **Done when:** Missing ids such as `toString` return the documented missing result; mutation attempts cannot act on inherited properties.
@@ -801,7 +803,7 @@ Only retain acceptance lines relevant to the work item. Add specific behavior fr
 
 | Phase | Started | Completed | Evidence / PRs | Remaining decisions |
 | --- | --- | --- | --- | --- |
-| 01 | — | — | — | — |
+| 01 | October 17, 2026 | — | [P01-01 / PR #22](https://github.com/keepithandy/pulse-engine/pull/22), [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/39083857321), [Integrity](https://github.com/keepithandy/pulse-engine/actions/runs/39083857325) | P01-02–P01-08 remain; phase gate still open. |
 | 02 | — | — | — | — |
 | 03 | — | — | — | — |
 | 04 | — | — | — | — |
@@ -869,7 +871,7 @@ The current coverage minimums are **80% lines**, **85% functions**, and **70% br
 
 ## First implementation brief
 
-Paste this into a future coding session to start with a concrete, limited change:
+This is the preserved implementation brief for **completed P01-01** (see [PR #22](https://github.com/keepithandy/pulse-engine/pull/22)). The next unfinished item is **P01-02**, which needs its own scoped implementation brief before work starts:
 
 ```text
 Repository: keepithandy/pulse-engine
