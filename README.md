@@ -15,7 +15,8 @@
     <a href="#capabilities">Capabilities</a> ·
     <a href="#how-the-simulation-behaves">Engine behavior</a> ·
     <a href="#repository-layout">Repository layout</a> ·
-    <a href="#documentation">Documentation</a>
+    <a href="#documentation">Documentation</a> ·
+    <a href="docs/PULSE-ENGINE-DEVELOPMENT-ROADMAP.md">Development roadmap</a>
   </p>
 </div>
 
@@ -268,7 +269,13 @@ Games that use it own their story, presentation, balance, and content. This boun
 | [`.github/workflows/`](.github/workflows/) | Engine quality and repository integrity automation |
 | [`package.json`](package.json) | Package exports, runtime requirements, and development scripts |
 
+## Development roadmap
+
+The [development roadmap](docs/PULSE-ENGINE-DEVELOPMENT-ROADMAP.md) organizes the next major updates into **14 phases and 100 trackable work items**. It includes a reviewed package baseline, confirmed findings, dependencies, milestone gates, and acceptance criteria for each item. New work begins with correctness and public API improvements, then progresses through replay, richer worlds, persistence, tooling, scale, and stable delivery.
+
 ## Documentation
+
+- [Development roadmap](docs/PULSE-ENGINE-DEVELOPMENT-ROADMAP.md) — phased updates, progress tracking, and implementation briefs
 
 - [Engine contracts](docs/engine-contracts.md) — API behavior, lifecycle, snapshots, saves, scheduling, diagnostics, and scenarios
 - [Example scenarios](scenarios/) — data-driven inputs for the headless runner
