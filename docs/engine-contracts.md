@@ -6,6 +6,23 @@ snapshots. Node 22+ and modern browsers with `structuredClone` and native ES mod
 are supported. CI tests Node 22/24 on Linux, Windows and macOS, plus Chromium and
 WebKit through Playwright. Physical-device testing is a separate consumer concern.
 
+## JSON-safe data boundaries
+
+P01-01 accepts ordinary records with own, enumerable string-keyed data properties,
+including null-prototype records, and dense ordinary arrays containing only
+own, enumerable indexed data properties. Array `length` is the one allowed
+non-enumerable array property. Nested data can contain null, booleans, strings,
+finite JSON-preserving numbers, records and arrays.
+
+Validation rejects array holes, inherited or accessor indices, custom array
+prototypes, extra array properties, symbol-keyed fields, non-enumerable fields,
+and accessor properties (including non-enumerable getters). It also rejects
+negative zero because JSON serialization changes `-0` to `0`. Runtime objects,
+functions, undefined values, non-finite numbers and cycles remain unsupported.
+Rejected accessors are inspected by their descriptors; their getters are not
+executed. Accepted data is compared by JSON value after save and restore, not
+by shared object identity.
+
 ## Dispatch and rules
 
 `createEngine({ initialState, systems, plugins, rules, seed })` returns an engine.
