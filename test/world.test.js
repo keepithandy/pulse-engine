@@ -137,4 +137,13 @@ test("component names that collide after trimming are rejected", () => {
   }), /Duplicate component name after normalization/);
   assert.deepEqual(engine.snapshot(), before);
 });
-
+test("entity allocation exhaustion rejects before changing the world", () => {
+  const engine = createEngine({
+    initialState: { world: { nextEntity: Number.MAX_SAFE_INTEGER, order: [], entities: {} } },
+    plugins: [createWorldPlugin()],
+    validateState: validateWorldState
+  });
+  const before = engine.snapshot();
+  assert.throws(() => engine.dispatch({ type: "world/entity.create", entityType: "actor" }), /Entity allocation counter/);
+  assert.deepEqual(engine.snapshot(), before);
+});
