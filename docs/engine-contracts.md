@@ -55,9 +55,13 @@ events. Invalid types, versions, ids, ticks and non-data payloads fail explicitl
 ## Time and scheduling
 
 Dispatching an ordinary action does not advance time. `step()` attempts exactly one
-tick, runs dependency-ordered `beforeTick` hooks and dispatches `@pulse/tick`, commits
-an `engine/tick` event, then runs read-only `afterTick` hooks and due scheduled actions.
-A rejected tick does not advance time. `advance(count)` stops on rejection and honors
+tick. Plugins are visited in dependency order; for each plugin, `beforeTick` runs
+immediately before that same plugin's `onAction` hook for `@pulse/tick`. This
+interleaved order preserves existing behavior. A rejected hook stops the remaining
+plugins and rejects the tick before state, events, revision, or time are committed.
+Hook-owned external side effects cannot be rolled back. An accepted tick commits its
+state and events, then runs read-only `afterTick` hooks and due scheduled actions.
+`advance(count)` stops on rejection and honors
 `pause()`; `step()` remains available while paused. `resume()` re-enables advance.
 
 `schedule(action, { at, interval, limit, id })` returns an id. `at` must be a future
@@ -200,6 +204,7 @@ trimming. Entity ids and component names stored in world state are canonical;
 component names in creation data are normalized, and collisions after trimming
 are rejected. Entity lookups inspect own properties only, so inherited names such
 as `toString` behave as missing entities. `getEntity` returns the canonical id.
+
 ## Counter and random range boundaries
 
 Action, revision, tick, event, schedule, and generated-entity counters stay within
@@ -212,3 +217,4 @@ Random floating ranges require finite endpoints and a finite span. Inclusive
 integer ranges require safe-integer endpoints and a maximum below
 `Number.MAX_SAFE_INTEGER`, so the exclusive upper bound can be represented
 without overflow. Invalid ranges reject without advancing the random generator.
+

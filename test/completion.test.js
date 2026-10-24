@@ -99,6 +99,41 @@ test("pause, one-step and tick hooks have explicit deterministic semantics", () 
   assert.equal(engine.getEvents().length, 3);
 });
 
+test("tick hooks interleave by plugin and a rejection prevents later hooks and commit", () => {
+  const makeHooks = (id, calls, reject = false) => ({
+    id,
+    beforeTick({ emit }) {
+      calls.push(`${id}:before`);
+      emit({ type: `${id}:before` });
+      if (reject) return { accepted: false, reason: "stop tick" };
+    },
+    onAction({ action, emit }) {
+      if (action.type !== "@pulse/tick") return;
+      calls.push(`${id}:action`);
+      emit({ type: `${id}:action` });
+    }
+  });
+
+  const calls = [];
+  const engine = makeEngine({ plugins: [makeHooks("a", calls), makeHooks("b", calls)] });
+  const tick = engine.step();
+  assert.equal(tick.advanced, true);
+  assert.deepEqual(calls, ["a:before", "a:action", "b:before", "b:action"]);
+  assert.deepEqual(tick.result.events.map(event => event.type),
+    ["a:before", "a:action", "b:before", "b:action", "engine/tick"]);
+  assert.equal(engine.getTick(), 1);
+
+  const rejectedCalls = [];
+  const rejected = makeEngine({ plugins: [makeHooks("a", rejectedCalls), makeHooks("b", rejectedCalls, true)] });
+  const before = rejected.snapshot();
+  const failedTick = rejected.step();
+  assert.equal(failedTick.advanced, false);
+  assert.equal(failedTick.result.reason, "stop tick");
+  assert.deepEqual(rejectedCalls, ["a:before", "a:action", "b:before"]);
+  assert.deepEqual(rejected.snapshot(), before);
+  assert.deepEqual(rejected.getEvents(), []);
+});
+
 test("rejected ticks do not advance and scheduled errors are reported without losing other work", () => {
   const engine = makeEngine({ plugins: [{ id: "reject", onAction({ action }) { if (action.type === "bad") throw Error("bad job"); } }] });
   engine.schedule({ type: "bad" }, { at: 1 }); engine.schedule({ type: "add" }, { at: 1 });
@@ -244,3 +279,4 @@ test("headless CLI repeats exact JSON, exports events, and fails invalid input",
     for (const bad of [[], ['--bad', 'x'], ['--scenario', 'missing.json'], ['--scenario', 'scenarios/minimal.json', '--ticks', '-1']]) assert.equal(run(bad).status, 1);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+

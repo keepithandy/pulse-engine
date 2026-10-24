@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 through P01-04 are completed and merged**, and the remaining 96 work items are not yet complete.
+> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 through P01-05 are completed and merged**, and the remaining 95 work items are not yet complete.
 
 | Document field | Value |
 | --- | --- |
@@ -22,8 +22,8 @@
 | Reviewed baseline | [`31a8289`](https://github.com/keepithandy/pulse-engine/commit/31a8289875b78fd7bc8363d23e86b9419f0980fc) |
 | Package | `@keepithandy/pulse-engine` |
 | Baseline version | `0.1.0-alpha.0` |
-| Work items completed | **4 / 100** |
-| Next work item | **P01-05 — Specify tick phase ordering** |
+| Work items completed | **5 / 100** |
+| Next work item | **P01-06 — Complete lifecycle and failure contracts** |
 
 ---
 
@@ -141,7 +141,7 @@ A milestone is complete only when its evidence is recorded. Passing the current 
 
 ## Phase 01 — Correctness and boundary hardening
 
-**Status:** in progress · **Progress:** 4/8 · **Depends on:** Reviewed baseline
+**Status:** in progress · **Progress:** 5/8 · **Depends on:** Reviewed baseline
 
 **Outcome:** A trustworthy baseline before the public API and feature surface grow.
 
@@ -167,8 +167,10 @@ A milestone is complete only when its evidence is recorded. Passing the current 
   - **Completed October 24, 2026.** [PR #26](https://github.com/keepithandy/pulse-engine/pull/26) guards event publication and batches, entity allocation, repeating-job rescheduling, and overflowing random ranges. Rejected operations preserve counters and engine state.
   - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40140652177) passed Node 22/24 across Linux, Windows, and macOS plus Chromium and WebKit; [repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40140652171) passed.
 
-- [ ] **P01-05 — Specify tick phase ordering.** Choose and document whether all `beforeTick` hooks finish before any `onAction` hook, or whether plug-ins execute interleaved.
+- [x] **P01-05 — Specify tick phase ordering.** Choose and document whether all `beforeTick` hooks finish before any `onAction` hook, or whether plug-ins execute interleaved.
   - **Done when:** A two-plug-in fixture locks down the chosen order, rejection behavior, and observable events; compatibility impact is recorded.
+  - **Completed October 24, 2026.** [PR #27](https://github.com/keepithandy/pulse-engine/pull/27) records dependency-ordered, per-plugin interleaving, preserving current behavior. Its two-plugin fixture verifies hook/event order and atomic rejection.
+  - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40140979291) passed Node 22/24 across Linux, Windows, and macOS plus Chromium and WebKit; [repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40140979301) passed.
 
 - [ ] **P01-06 — Complete lifecycle and failure contracts.** Define subscription cleanup, post-disposal reads/writes, observer errors, and irreversible external side effects in hooks.
   - **Done when:** Lifecycle tests cover retained listeners and failed setup/disposal; documentation states exactly which engine changes roll back.
