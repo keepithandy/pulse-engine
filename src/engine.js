@@ -45,12 +45,20 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
     if (disposed) throw new Error("Engine has been disposed.");
     if (busy) throw new Error("Reentrant engine mutation is unsupported.");
   }
+  function assertNotDisposed() {
+    if (disposed) throw new Error("Engine has been disposed.");
+  }
   function getState() { return copyData(state); }
   function getTick() { return tick; }
   function subscribe(listener) {
+    assertNotDisposed();
     if (typeof listener !== "function") throw new TypeError("Engine subscribers must be functions.");
     listeners.add(listener);
     return () => listeners.delete(listener);
+  }
+  function subscribeToEvents(listener, options) {
+    assertNotDisposed();
+    return events.subscribe(listener, options);
   }
   function pluginContext(pluginId) {
     return Object.freeze({ pluginId, getEvents: events.read, getState, getTick, getRandomState: random.getState });
@@ -243,7 +251,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
     try { for (const plugin of [...pluginRegistry.ordered()].reverse()) {
       try { if (plugin.dispose) invoke(plugin.dispose, pluginContext(plugin.id)); } catch (error) { errors.push(error); }
       pluginRegistry.remove(plugin.id);
-    } } finally { disposed = true; busy = false; listeners.clear(); }
+    } } finally { disposed = true; busy = false; listeners.clear(); events.clearSubscribers(); }
     return errors;
   }
   snapshot(); busy = true;
@@ -255,10 +263,11 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
     for (const plugin of initialized.reverse()) { try { plugin.dispose?.(pluginContext(plugin.id)); } catch { /* preserve setup error */ } }
     throw error;
   } finally { busy = false; }
-  return Object.freeze({ dispatch, getState, getTick, subscribe, subscribeToEvents: events.subscribe,
+  return Object.freeze({ dispatch, getState, getTick, subscribe, subscribeToEvents,
     getEvents: events.read, getRandomState: random.getState, getPlugins: pluginRegistry.list,
     registerPlugin, unregisterPlugin, snapshot, restore, fork: id => forkSnapshotRecord(snapshot(), id),
     schedule, cancelSchedule, getSchedules: scheduler.list, step, advance, pause, resume, inspect,
     getExplanation, dispose, exportSave: () => serializeSnapshot(snapshot()),
     importSave: (input, options) => restore(deserializeSave(input, options)) });
 }
+
