@@ -9,10 +9,14 @@ const ACTIONS = new Set([
 const RESERVED_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 
 function assertKey(value, label) {
-  if (typeof value !== "string" || !value.trim() || RESERVED_KEYS.has(value)) {
+  if (typeof value !== "string") {
     throw new TypeError(`${label} must be a non-empty, non-reserved string.`);
   }
-  return value.trim();
+  const key = value.trim();
+  if (!key || RESERVED_KEYS.has(key)) {
+    throw new TypeError(`${label} must be a non-empty, non-reserved string.`);
+  }
+  return key;
 }
 
 function assertRecord(value, label) {
@@ -35,6 +39,7 @@ function worldFrom(state) {
 }
 
 function readEntityRecord(world, id) {
+  if (!Object.hasOwn(world.entities, id)) return null;
   const record = world.entities[id];
   return record ? copyData(record) : null;
 }
@@ -44,8 +49,8 @@ function readEntityRecord(world, id) {
  * State is kept under state.world and is therefore included in engine snapshots.
  */
 export function createWorldPlugin({ id = "pulse-world", idPrefix = "entity" } = {}) {
-  assertKey(id, "World plug-in id");
-  assertKey(idPrefix, "Entity id prefix");
+  id = assertKey(id, "World plug-in id");
+  idPrefix = assertKey(idPrefix, "Entity id prefix");
   return Object.freeze({
     id,
     version: "1.0.0",
@@ -73,15 +78,22 @@ export function createWorldPlugin({ id = "pulse-world", idPrefix = "entity" } = 
         }
         const components = action.components ?? {};
         assertRecord(components, "Components");
-        for (const key of Object.keys(components)) assertKey(key, "Component name");
-        world.entities[entityId] = { type, components: copyData(components) };
+        const normalizedComponents = {};
+        for (const [key, value] of Object.entries(components)) {
+          const name = assertKey(key, "Component name");
+          if (Object.hasOwn(normalizedComponents, name)) {
+            throw new TypeError(`Duplicate component name after normalization: ${name}.`);
+          }
+          normalizedComponents[name] = copyData(value);
+        }
+        world.entities[entityId] = { type, components: normalizedComponents };
         world.order.push(entityId);
         events.push({ type: "world/entity.created", payload: { entityId, entityType: type } });
         return { state: nextState, events };
       }
 
       const entityId = assertKey(action.entityId, "Entity id");
-      const entity = world.entities[entityId];
+      const entity = Object.hasOwn(world.entities, entityId) ? world.entities[entityId] : null;
       if (!entity) return { accepted: false, reason: `Unknown entity ${entityId}.` };
 
       if (action.type === "world/entity.destroy") {
@@ -111,9 +123,9 @@ export function createWorldPlugin({ id = "pulse-world", idPrefix = "entity" } = 
 export function getEntity(state, entityId) {
   assertRecord(state, "World state");
   const world = worldFrom(state);
-  return readEntityRecord(world, assertKey(entityId, "Entity id"))
-    ? { id: entityId, ...readEntityRecord(world, entityId) }
-    : null;
+  const id = assertKey(entityId, "Entity id");
+  const entity = readEntityRecord(world, id);
+  return entity ? { id, ...entity } : null;
 }
 
 /**
@@ -130,6 +142,7 @@ export function queryEntities(state, { type, with: required = [], without = [] }
   required = required.map(name => assertKey(name, "Component name"));
   without = without.map(name => assertKey(name, "Component name"));
   return world.order.flatMap(id => {
+    if (!Object.hasOwn(world.entities, id)) return [];
     const entity = world.entities[id];
     if (!entity || (type !== undefined && entity.type !== type)) return [];
     const components = entity.components ?? {};
