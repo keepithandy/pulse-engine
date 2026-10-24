@@ -191,3 +191,13 @@ const engine = createEngine({
 
 This is the first P01-03 implementation slice. Automatic plug-in validator
 registration and broader identity/counter hardening remain separate work.
+
+## Entity identity and lookup
+
+World identifiers and names are trimmed at API boundaries. Empty values and the
+reserved names `__proto__`, `prototype`, and `constructor` are rejected after
+trimming. Entity ids and component names stored in world state are canonical;
+component names in creation data are normalized, and collisions after trimming
+are rejected. Entity lookups inspect own properties only, so inherited names such
+as `toString` behave as missing entities. `getEntity` returns the canonical id.
+
