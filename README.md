@@ -212,10 +212,13 @@ node bin/pulse-run.js --scenario scenarios/resource-network.json --seed demo --t
 
 | Option | Purpose |
 | --- | --- |
+| `--help`, `-h` | Show usage without running a simulation |
 | `--scenario` | Select the scenario JSON file |
 | `--seed` | Supply a seed for the run |
 | `--ticks` | Set the requested tick count |
 | `--events` | Write the complete run event log to a file |
+
+Every run option requires a nonblank value. Missing values and repeated or unknown options exit with code 1 and a diagnostic on stderr; failed runs do not print a JSON summary. File errors identify the scenario or event-output path that needs attention.
 
 The runner operates without a DOM and limits requested tick counts to one million. Its JSON output can be inspected directly or consumed by another tool.
 
