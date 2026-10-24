@@ -163,6 +163,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
       const decision = evaluator.evaluate({ action, state: candidateState, random: randomApi, tick: targetTick, collectTraces: diagnostics });
       traces = decision.traces;
       if (!decision.accepted) return reject(decision.reason);
+      if (advancing) scheduler.validateDue(targetTick);
       candidateState = copyData(decision.state);
       pendingEvents.push(...decision.events);
       if (advancing) pendingEvents.push({ type: "engine/tick", source: "engine", payload: { tick: targetTick } });

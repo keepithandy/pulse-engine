@@ -69,3 +69,13 @@ test("rejected actions roll random state back", () => {
 
   assert.deepEqual(first.getState(), second.getState());
 });
+test("unsafe integer and overflowing float ranges reject before drawing", () => {
+  const random = createSeededRandom(19);
+  const before = random.getState();
+  assert.throws(() => random.integer(0, Number.MAX_SAFE_INTEGER), /safe integer boundaries/);
+  assert.deepEqual(random.getState(), before);
+  assert.throws(() => random.integer(Number.MAX_SAFE_INTEGER + 1, Number.MAX_SAFE_INTEGER + 2), /safe integer boundaries/);
+  assert.deepEqual(random.getState(), before);
+  assert.throws(() => random.float(-Number.MAX_VALUE, Number.MAX_VALUE), /finite span/);
+  assert.deepEqual(random.getState(), before);
+});

@@ -24,8 +24,8 @@ function normalizeSeed(seed) {
 }
 
 function assertFiniteRange(min, max) {
-  if (!Number.isFinite(min) || !Number.isFinite(max) || max < min) {
-    throw new RangeError("Random ranges require finite values with max >= min.");
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max < min || !Number.isFinite(max - min)) {
+    throw new RangeError("Random ranges require finite values with max >= min and a finite span.");
   }
 }
 
@@ -47,12 +47,12 @@ export function createSeededRandom(seed = 0) {
   }
 
   function integer(min, max) {
-    if (!Number.isInteger(min) || !Number.isInteger(max)) {
-      throw new RangeError("Random integer ranges require integer boundaries.");
+    if (!Number.isSafeInteger(min) || !Number.isSafeInteger(max) || max === Number.MAX_SAFE_INTEGER) {
+      throw new RangeError("Random integer ranges require safe integer boundaries and max below Number.MAX_SAFE_INTEGER.");
     }
 
     assertFiniteRange(min, max);
-    return Math.floor(float(min, max + 1));
+    return Math.min(max, Math.floor(float(min, max + 1)));
   }
 
   function pick(values) {

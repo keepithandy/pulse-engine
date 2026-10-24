@@ -200,4 +200,15 @@ trimming. Entity ids and component names stored in world state are canonical;
 component names in creation data are normalized, and collisions after trimming
 are rejected. Entity lookups inspect own properties only, so inherited names such
 as `toString` behave as missing entities. `getEntity` returns the canonical id.
+## Counter and random range boundaries
 
+Action, revision, tick, event, schedule, and generated-entity counters stay within
+the non-negative safe-integer range. Operations that would exceed that range
+reject before changing the checkpoint; a tick also checks that due repeating
+schedules can advance before it commits. Event batches reserve sequence capacity
+before any event is published.
+
+Random floating ranges require finite endpoints and a finite span. Inclusive
+integer ranges require safe-integer endpoints and a maximum below
+`Number.MAX_SAFE_INTEGER`, so the exclusive upper bound can be represented
+without overflow. Invalid ranges reject without advancing the random generator.

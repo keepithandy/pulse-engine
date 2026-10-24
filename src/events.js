@@ -41,7 +41,9 @@ export function createEventJournal({ historyLimit = 1000 } = {}) {
 
   function publish(input, defaults = {}) {
     input = prepare([input], defaults)[0];
-    sequence += 1;
+    const nextSequence = sequence + 1;
+    assertCounter(nextSequence, "Event sequence");
+    sequence = nextSequence;
 
     const event = deepFreeze({
       ...cloneValue(input),
@@ -137,6 +139,7 @@ export function createEventJournal({ historyLimit = 1000 } = {}) {
   }
 
   function prepare(inputs, defaults = {}) {
+    assertCounter(sequence + inputs.length, "Event sequence");
     return freezeData(inputs.map(input => {
       assertEvent(input);
       const event = { ...copyData(input), tick: input.tick ?? defaults.tick ?? 0, source: input.source ?? defaults.source ?? "engine" };

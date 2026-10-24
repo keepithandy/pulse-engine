@@ -33,6 +33,14 @@ export function createTickScheduler({ capacity = 10000 } = {}) {
     return freezeData(copyData(jobs.filter(job => job.at <= tick).sort((a, b) => a.at - b.at || a.sequence - b.sequence)));
   }
 
+  function validateDue(tick) {
+    for (const job of jobs) {
+      if (job.at <= tick && job.interval !== null && job.remaining !== 1) {
+        assertCounter(job.at + job.interval, "Next schedule tick");
+      }
+    }
+  }
+
   function consume(id) {
     const job = jobs.find(item => item.id === id);
     if (!job) return false;
@@ -70,5 +78,5 @@ export function createTickScheduler({ capacity = 10000 } = {}) {
     jobs = candidate.jobs;
   }
 
-  return Object.freeze({ schedule, cancel, due, consume, list, exportState, restoreState });
+  return Object.freeze({ schedule, cancel, due, validateDue, consume, list, exportState, restoreState });
 }
