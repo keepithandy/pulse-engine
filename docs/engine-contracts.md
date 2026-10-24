@@ -100,6 +100,21 @@ registry in reverse dependency order and reports disposal errors. Observational 
 receive state/events/tick getters and a random-state getter, not mutable PRNG methods.
 `resource-flow` in the scenario registry is the reusable example plug-in.
 
+Initial setup runs in dependency order. If setup fails, cleanup is attempted in reverse
+order for the failing plug-in and those already initialized; cleanup errors do not
+replace the original setup error. A dynamically registered plug-in is removed if its
+setup fails. Unregister removes the plug-in before calling its `dispose`; if that hook
+throws, removal remains in effect and the error propagates. Full-engine disposal runs
+every cleanup hook even when one fails, returns the collected errors, clears state and
+event subscriptions, and can only be called once.
+
+After disposal, state and checkpoint reads remain available. Dispatch, restore,
+scheduling, plug-in changes, and new subscriptions fail. Existing unsubscribe
+functions remain safe to call. Observer and plug-in hook failures after commit are
+reported and do not roll engine state back. Engine rollback covers engine-owned state,
+randomness, counters, schedules, and unpublished events; it cannot reverse external
+side effects performed by consumer hooks or listeners.
+
 `inspect()` returns a frozen copy of state, tick, revision, branch, pause flag, schedules,
 plug-ins, events and traces. `redact(data)` runs on a copy for consumer-owned fields.
 `eventHistoryLimit` and `traceLimit` bound memory. `diagnostics: false` disables trace

@@ -221,6 +221,34 @@ test("failed initialization cleans up the failing plugin and initialized depende
   assert.deepEqual(disposed, ["b", "a", "bad"]);
 });
 
+test("dispose blocks new subscriptions and writes while preserving read access", () => {
+  const engine = makeEngine();
+  const unsubscribe = engine.subscribe(() => {});
+  const unsubscribeFromEvents = engine.subscribeToEvents(() => {});
+  const before = engine.snapshot();
+
+  assert.deepEqual(engine.dispose(), []);
+  assert.deepEqual(engine.getState(), { count: 0 });
+  assert.equal(engine.getTick(), 0);
+  assert.deepEqual(engine.snapshot(), before);
+  assert.throws(() => engine.dispatch({ type: "add" }), /disposed/);
+  assert.throws(() => engine.subscribe(() => {}), /disposed/);
+  assert.throws(() => engine.subscribeToEvents(() => {}), /disposed/);
+  unsubscribe();
+  unsubscribeFromEvents();
+});
+
+test("unregister removes a plugin even when its dispose hook fails", () => {
+  const engine = makeEngine({ plugins: [{
+    id: "cleanup-fails",
+    dispose() { throw new Error("cleanup failed"); }
+  }] });
+
+  assert.throws(() => engine.unregisterPlugin("cleanup-fails"), /cleanup failed/);
+  assert.equal(engine.getPlugins().some(plugin => plugin.id === "cleanup-fails"), false);
+  assert.equal(engine.unregisterPlugin("cleanup-fails"), false);
+});
+
 test("exhausted deterministic counters reject new work without mutating checkpoints", () => {
   const engine = makeEngine(); const checkpoint = structuredClone(engine.snapshot());
   checkpoint.actionSequence = Number.MAX_SAFE_INTEGER;

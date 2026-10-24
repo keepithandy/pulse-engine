@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 through P01-05 are completed and merged**, and the remaining 95 work items are not yet complete.
+> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 through P01-06 are completed and merged**, and the remaining 94 work items are not yet complete.
 
 | Document field | Value |
 | --- | --- |
@@ -22,8 +22,8 @@
 | Reviewed baseline | [`31a8289`](https://github.com/keepithandy/pulse-engine/commit/31a8289875b78fd7bc8363d23e86b9419f0980fc) |
 | Package | `@keepithandy/pulse-engine` |
 | Baseline version | `0.1.0-alpha.0` |
-| Work items completed | **5 / 100** |
-| Next work item | **P01-06 — Complete lifecycle and failure contracts** |
+| Work items completed | **6 / 100** |
+| Next work item | **P01-07 — Define scenario-to-world mapping** |
 
 ---
 
@@ -141,7 +141,7 @@ A milestone is complete only when its evidence is recorded. Passing the current 
 
 ## Phase 01 — Correctness and boundary hardening
 
-**Status:** in progress · **Progress:** 5/8 · **Depends on:** Reviewed baseline
+**Status:** in progress · **Progress:** 6/8 · **Depends on:** Reviewed baseline
 
 **Outcome:** A trustworthy baseline before the public API and feature surface grow.
 
@@ -172,8 +172,10 @@ A milestone is complete only when its evidence is recorded. Passing the current 
   - **Completed October 24, 2026.** [PR #27](https://github.com/keepithandy/pulse-engine/pull/27) records dependency-ordered, per-plugin interleaving, preserving current behavior. Its two-plugin fixture verifies hook/event order and atomic rejection.
   - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40140979291) passed Node 22/24 across Linux, Windows, and macOS plus Chromium and WebKit; [repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40140979301) passed.
 
-- [ ] **P01-06 — Complete lifecycle and failure contracts.** Define subscription cleanup, post-disposal reads/writes, observer errors, and irreversible external side effects in hooks.
+- [x] **P01-06 — Complete lifecycle and failure contracts.** Define subscription cleanup, post-disposal reads/writes, observer errors, and irreversible external side effects in hooks.
   - **Done when:** Lifecycle tests cover retained listeners and failed setup/disposal; documentation states exactly which engine changes roll back.
+  - **Completed October 24, 2026.** [PR #28](https://github.com/keepithandy/pulse-engine/pull/28) clears subscriptions and blocks writes/new subscriptions after disposal while preserving reads. It documents setup, unregister, disposal, observer, and external-side-effect failure behavior, with lifecycle regression coverage.
+  - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40141298868) passed Node 22/24 across Linux, Windows, and macOS plus Chromium and WebKit; [repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40141298856) passed.
 
 - [ ] **P01-07 — Define scenario-to-world mapping.** Document how scenario `state.entities` relates to the world plug-in's `state.world` and choose a compatibility strategy.
   - **Done when:** A written state-layout decision and migration fixture specification remove ambiguity before the world expansion.
