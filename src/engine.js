@@ -15,9 +15,16 @@ function assertAction(action) {
 
 export function createEngine({ initialState = {}, systems = [], plugins = [], rules = [],
   eventHistoryLimit = 1000, seed = 0, branchId = "main", scheduleCapacity = 10000,
-  diagnostics = true, traceLimit = 1000, redact = value => value } = {}) {
+  validateState = () => {}, diagnostics = true, traceLimit = 1000, redact = value => value } = {}) {
   if (!Number.isSafeInteger(traceLimit) || traceLimit < 1 || typeof redact !== "function") throw new TypeError("Invalid diagnostics configuration.");
+  if (typeof validateState !== "function") throw new TypeError("validateState must be a function.");
+  function checkState(value) {
+    const result = validateState(freezeData(copyData(value)));
+    if (result && typeof result.then === "function") throw new TypeError("State validation must be synchronous.");
+    if (result === false) throw new TypeError("State validation rejected the state.");
+  }
   let state = copyData(initialState);
+  checkState(state);
   let revision = 0;
   let actionSequence = 0;
   let tick = 0;
@@ -100,7 +107,12 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
   }
   function restore(input) {
     assertMutable();
-    installSnapshot(input);
+    busy = true;
+    try {
+      const candidate = validateSnapshotRecord(input);
+      checkState(candidate.state);
+      installSnapshot(candidate);
+    } finally { busy = false; }
     explanations = [];
     return { restored: true, branch: copyData(branch), revision, state: getState() };
   }
