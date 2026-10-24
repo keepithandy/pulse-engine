@@ -138,3 +138,29 @@ export function queryEntities(state, { type, with: required = [], without = [] }
     return [{ id, type: entity.type, components: copyData(components) }];
   });
 }
+
+/** Validate a detached world before restoring it. Throws on inconsistent records. */
+export function validateWorldState(input) {
+  const state = copyData(input);
+  assertRecord(state, "World state");
+  if (!Object.hasOwn(state, "world")) return true;
+  if (state.world === null) throw new TypeError("World must be an object.");
+  const world = worldFrom(state);
+  const seen = new Set();
+  for (const id of world.order) {
+    if (assertKey(id, "Entity id") !== id || seen.has(id) || !Object.hasOwn(world.entities, id)) {
+      throw new TypeError("World order requires unique canonical ids with matching entities.");
+    }
+    seen.add(id);
+  }
+  for (const [id, entity] of Object.entries(world.entities)) {
+    if (!seen.has(id)) throw new TypeError(`Entity ${id} is missing from world order.`);
+    assertRecord(entity, "Entity record");
+    if (assertKey(entity.type, "Entity type") !== entity.type) throw new TypeError("Entity type must be canonical.");
+    assertRecord(entity.components, "Components");
+    for (const key of Object.keys(entity.components)) {
+      if (assertKey(key, "Component name") !== key) throw new TypeError("Component name must be canonical.");
+    }
+  }
+  return true;
+}

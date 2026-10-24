@@ -165,3 +165,29 @@ snapshot branches, restored schedules, lifecycle dependencies, legacy migration,
 scenario validation, subprocess runner behavior, read-only diagnostics, and CI/package/
 compatibility gates. Coverage minimums are 80% lines, 85% functions, 70% branches.
 Deterministic repeat/restore fixtures run in every test job; any failure fails the job.
+
+## State validation at load boundaries
+
+`createEngine({ validateState })` accepts an optional synchronous validator. It
+receives a deeply frozen, detached copy of initial state and of each proposed
+restore/import state. Throw or return `false` to reject; other synchronous return
+values accept. Promise results are unsupported. Restore validation runs with
+engine mutations blocked and before any live checkpoint fields change. Validators
+must be pure: external side effects cannot be rolled back. This boundary does not
+validate every action; action rules remain responsible for transition constraints.
+
+For entity worlds, import `validateWorldState` from the package and pass it as
+`validateState`. It accepts states without a world and checks existing worlds for
+valid counters, unique ordered ids, matching entity records, canonical names, and
+component objects. It does not impose game-specific component schemas. Compose it
+with your own validator when additional game constraints are needed.
+
+```js
+const engine = createEngine({
+  plugins: [createWorldPlugin()],
+  validateState: validateWorldState
+});
+```
+
+This is the first P01-03 implementation slice. Automatic plug-in validator
+registration and broader identity/counter hardening remain separate work.
