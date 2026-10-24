@@ -91,6 +91,10 @@ export function createEventJournal({ historyLimit = 1000 } = {}) {
     return () => subscribers.delete(subscription);
   }
 
+  function clearSubscribers() {
+    subscribers.clear();
+  }
+
   function read({ type, limit = historyLimit } = {}) {
     if (!Number.isInteger(limit) || limit < 0) {
       throw new RangeError("Event read limit must be a non-negative integer.");
@@ -147,6 +151,7 @@ export function createEventJournal({ historyLimit = 1000 } = {}) {
       return event;
     }));
   }
-  return Object.freeze({ exportState, prepare, publish, read, restoreState, subscribe });
+  return Object.freeze({ clearSubscribers, exportState, prepare, publish, read, restoreState, subscribe });
 }
 import { assertCounter, copyData, freezeData } from "./data.js";
+
