@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { createEngine, createEventJournal, createMigrationRegistry, createTickScheduler,
-  createEngineFromScenario, validateScenario, exampleSystemRegistry } from "../src/index.js";
+  createEngineFromScenario, createWorldPlugin, validateScenario, exampleSystemRegistry } from "../src/index.js";
 
 const counter = { id: "counter", version: "1.0.0", onAction({ action, state, emit }) {
   if (action.type !== "add") return;
@@ -295,6 +295,20 @@ test("minimal and advanced scenarios validate, run deterministically and separat
   assert.equal(validateScenario({ bad: new Date() }).valid, false);
 });
 
+test("scenario entities remain separate from opt-in world state", () => {
+  const scenario = JSON.parse(readFileSync("scenarios/resource-network.json"));
+  const engine = createEngineFromScenario({ ...scenario, systems: ["pulse-world"] }, {
+    systemRegistry: { "pulse-world": () => createWorldPlugin() }
+  });
+
+  assert.deepEqual(engine.getState().entities, scenario.entities);
+  assert.equal(Object.hasOwn(engine.getState(), "world"), false);
+  const result = engine.dispatch({ type: "world/entity.create", entityType: "worker" });
+  assert.equal(result.accepted, true);
+  assert.deepEqual(engine.getState().entities, scenario.entities);
+  assert.equal(engine.getState().world.order.length, 1);
+});
+
 test("headless CLI repeats exact JSON, exports events, and fails invalid input", () => {
   const run = args => spawnSync(process.execPath, ['bin/pulse-run.js', ...args], { encoding: 'utf8' });
   const dir = mkdtempSync(join(tmpdir(), 'pulse-test-'));
@@ -307,4 +321,5 @@ test("headless CLI repeats exact JSON, exports events, and fails invalid input",
     for (const bad of [[], ['--bad', 'x'], ['--scenario', 'missing.json'], ['--scenario', 'scenarios/minimal.json', '--ticks', '-1']]) assert.equal(run(bad).status, 1);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
 
