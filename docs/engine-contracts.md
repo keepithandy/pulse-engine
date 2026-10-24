@@ -240,8 +240,4 @@ Random floating ranges require finite endpoints and a finite span. Inclusive
 integer ranges require safe-integer endpoints and a maximum below
 `Number.MAX_SAFE_INTEGER`, so the exclusive upper bound can be represented
 without overflow. Invalid ranges reject without advancing the random generator.
-<<<<<<< HEAD
-=======
-
->>>>>>> 415482943437709a21ce6774e9290f8782be56d7
 
