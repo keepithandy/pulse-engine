@@ -36,3 +36,30 @@ test("consumer validation checks initialization and restore without mutating liv
   assert.deepEqual(engine.snapshot(), before);
   engine.restore(before);
 });
+
+test("world validation rejects noncanonical stored entity ids", () => {
+  const state = { world: { nextEntity: 1, order: [" hero "], entities: {
+    " hero ": { type: "actor", components: {} }
+  } } };
+  assert.throws(() => validateWorldState(state), /canonical/);
+});
+
+test("generated entity ids skip occupied ids after initialization", () => {
+  const engine = createEngine({
+    initialState: { world: { nextEntity: 1, order: ["entity-000001"], entities: {
+      "entity-000001": { type: "existing", components: { health: 10 } }
+    } } },
+    plugins: [createWorldPlugin()],
+    validateState: validateWorldState
+  });
+
+  const result = engine.dispatch({ type: "world/entity.create", entityType: "new" });
+  const state = engine.getState();
+
+  assert.equal(result.accepted, true);
+  assert.deepEqual(state.world.order, ["entity-000001", "entity-000002"]);
+  assert.equal(state.world.entities["entity-000001"].type, "existing");
+  assert.equal(state.world.entities["entity-000002"].type, "new");
+  engine.dispose();
+});
+
