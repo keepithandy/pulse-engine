@@ -192,10 +192,28 @@ test("exhausted deterministic counters reject new work without mutating checkpoi
   engine.restore(checkpoint); const before = engine.snapshot();
   assert.throws(() => engine.dispatch({ type: "add" }), /Action sequence/);
   assert.deepEqual(engine.snapshot(), before);
+  const exhaustedRevision = structuredClone(before); exhaustedRevision.actionSequence = 0; exhaustedRevision.revision = Number.MAX_SAFE_INTEGER;
+  engine.restore(exhaustedRevision); const revisionBefore = engine.snapshot();
+  assert.throws(() => engine.dispatch({ type: "add" }), /Revision/);
+  assert.deepEqual(engine.snapshot(), revisionBefore);
+  const exhaustedTick = structuredClone(before); exhaustedTick.actionSequence = 0; exhaustedTick.revision = 0; exhaustedTick.tick = Number.MAX_SAFE_INTEGER;
+  engine.restore(exhaustedTick); const tickBefore = engine.snapshot();
+  assert.throws(() => engine.step(), /Tick/);
+  assert.deepEqual(engine.snapshot(), tickBefore);
   const scheduler = createTickScheduler();
   scheduler.restoreState({ version: 1, sequence: Number.MAX_SAFE_INTEGER, jobs: [] });
   assert.throws(() => scheduler.schedule({ type: "add" }, { at: 1 }), /Schedule sequence/);
   assert.deepEqual(scheduler.list(), []);
+
+  const scheduled = makeEngine();
+  const lastTick = structuredClone(scheduled.snapshot());
+  lastTick.tick = Number.MAX_SAFE_INTEGER - 1;
+  lastTick.schedules = { version: 1, sequence: 1, jobs: [
+    { id: "repeat", sequence: 1, action: { type: "add" }, at: Number.MAX_SAFE_INTEGER, interval: 1, remaining: null }
+  ] };
+  scheduled.restore(lastTick); const scheduledBefore = scheduled.snapshot();
+  assert.throws(() => scheduled.step(), /Next schedule tick/);
+  assert.deepEqual(scheduled.snapshot(), scheduledBefore);
 });
 
 test("minimal and advanced scenarios validate, run deterministically and separate game data", () => {
