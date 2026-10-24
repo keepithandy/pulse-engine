@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 is completed and merged**, and the remaining 99 work items are not yet complete.
+> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 through P01-03 are completed and merged**, and the remaining 97 work items are not yet complete.
 
 | Document field | Value |
 | --- | --- |
@@ -22,8 +22,8 @@
 | Reviewed baseline | [`31a8289`](https://github.com/keepithandy/pulse-engine/commit/31a8289875b78fd7bc8363d23e86b9419f0980fc) |
 | Package | `@keepithandy/pulse-engine` |
 | Baseline version | `0.1.0-alpha.0` |
-| Work items completed | **1 / 100** |
-| Next work item | **P01-02 — Harden entity identity and lookups** |
+| Work items completed | **3 / 100** |
+| Next work item | **P01-04 — Guard every deterministic counter** |
 
 ---
 
@@ -141,7 +141,7 @@ A milestone is complete only when its evidence is recorded. Passing the current 
 
 ## Phase 01 — Correctness and boundary hardening
 
-**Status:** in progress · **Progress:** 1/8 · **Depends on:** Reviewed baseline
+**Status:** in progress · **Progress:** 3/8 · **Depends on:** Reviewed baseline
 
 **Outcome:** A trustworthy baseline before the public API and feature surface grow.
 
@@ -150,13 +150,17 @@ A milestone is complete only when its evidence is recorded. Passing the current 
 - [x] **P01-01 — Make data validation inert.** Validate array property descriptors before reading values; define handling of sparse arrays, symbols, accessors, and unsupported properties.
   - **Done when:** Array getters never execute during validation or copying, and supported values round-trip through saves without silent changes.
   - **Completed October 17, 2026.** [PR #22](https://github.com/keepithandy/pulse-engine/pull/22) merged into `main` at [`1ed004c`](https://github.com/keepithandy/pulse-engine/commit/1ed004cbe3b929f214e183cceba9002186fc567c). The fix validates array-index descriptors without running getters, rejects data shapes that would not survive JSON faithfully, and documents the supported boundary in `docs/engine-contracts.md`. Nine regression tests cover unsafe fields, no getter execution, unchanged rejected-operation checkpoints, and JSON save/restore.
-  - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/39083857321) passed across Node 22/24 on Ubuntu, Windows and macOS and Chromium/WebKit; CI ran `npm ci`, `npm run lint`, `npm test`, `npm run test:coverage`, `npm run check:package`, `npm run smoke`, and browser checks. [Repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/39083857325) passed. Scope is limited to P01-01; P01-02 through P01-08 remain open.
+  - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/39083857321) passed across Node 22/24 on Ubuntu, Windows and macOS and Chromium/WebKit; CI ran `npm ci`, `npm run lint`, `npm test`, `npm run test:coverage`, `npm run check:package`, `npm run smoke`, and browser checks. [Repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/39083857325) passed.
 
-- [ ] **P01-02 — Harden entity identity and lookups.** Use own-property lookups consistently and define one policy for whitespace and reserved identifiers.
+- [x] **P01-02 — Harden entity identity and lookups.** Use own-property lookups consistently and define one policy for whitespace and reserved identifiers.
   - **Done when:** Missing ids such as `toString` return the documented missing result; mutation attempts cannot act on inherited properties.
+  - **Completed October 24, 2026.** [PR #25](https://github.com/keepithandy/pulse-engine/pull/25) merged at [`f5c6281`](https://github.com/keepithandy/pulse-engine/commit/f5c6281b7c9cd1d8b7e73f2be494d28c26965ccf). Own-property lookup, canonical input policy, and regression coverage are in place.
+  - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40139853366) and [repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40139853302) passed.
 
-- [ ] **P01-03 — Validate restored world invariants.** Add a consumer/plug-in state-validation boundary and validate world order, entity records, components, and counters before installing state.
+- [x] **P01-03 — Validate restored world invariants.** Add a consumer/plug-in state-validation boundary and validate world order, entity records, components, and counters before installing state.
   - **Done when:** Duplicate order entries, dangling ids, and malformed world records reject atomically without coupling the core to game schemas.
+  - **Completed October 24, 2026.** [PR #24](https://github.com/keepithandy/pulse-engine/pull/24) merged at [`fdd7a20`](https://github.com/keepithandy/pulse-engine/commit/fdd7a20a9a16fd166002f1512901cd011ac1d13f). `validateState` and `validateWorldState` reject malformed restores atomically.
+  - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40131883832) and [repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40131883833) passed.
 
 - [ ] **P01-04 — Guard every deterministic counter.** Audit event sequences, entity allocation, schedules, revisions, and numeric random-range boundaries.
   - **Done when:** Operations at safe-integer boundaries reject before mutation; generated identities remain unique across restore.
