@@ -160,7 +160,15 @@ seed and enabled systems. `validateScenario()` adds semantic uniqueness/referenc
 checks and JSON-path errors. Game-specific fields live in `gameData`; a consumer can
 provide `validateGameData` returning error strings. `createEngineFromScenario()`
 requires explicit allowlisted system factories and validates before engine setup.
-Both checked-in example scenarios run without a DOM.
+Both checked-in example scenarios run without a DOM. Scenario v1 `entities` remain
+at `state.entities`; the world plug-in owns `state.world` and does not import them
+implicitly. See [the scenario/world mapping decision](scenario-world-mapping.md).
+
+Scenario v1 `entities` remain at `state.entities`. The world plug-in owns
+`state.world`; installing it does not alias, copy, or transform scenario entities.
+These layouts may coexist, and each keeps its existing meaning. An application that
+needs the world representation must opt into a conversion. Phase 04's adapter will
+define that conversion and migration path explicitly.
 
 ```sh
 npm ci
@@ -232,4 +240,8 @@ Random floating ranges require finite endpoints and a finite span. Inclusive
 integer ranges require safe-integer endpoints and a maximum below
 `Number.MAX_SAFE_INTEGER`, so the exclusive upper bound can be represented
 without overflow. Invalid ranges reject without advancing the random generator.
+<<<<<<< HEAD
+=======
+
+>>>>>>> 415482943437709a21ce6774e9290f8782be56d7
 
