@@ -240,4 +240,7 @@ Random floating ranges require finite endpoints and a finite span. Inclusive
 integer ranges require safe-integer endpoints and a maximum below
 `Number.MAX_SAFE_INTEGER`, so the exclusive upper bound can be represented
 without overflow. Invalid ranges reject without advancing the random generator.
+The Phase 01 findings and their public regression coverage are mapped in
+[the adversarial contract matrix](adversarial-contract-matrix.md).
+
 
