@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 through P01-07 are completed and merged**, and the remaining 93 work items are not yet complete.
+> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 through P01-08 are completed and merged**, and the remaining 92 work items are not yet complete.
 
 | Document field | Value |
 | --- | --- |
@@ -22,8 +22,8 @@
 | Reviewed baseline | [`31a8289`](https://github.com/keepithandy/pulse-engine/commit/31a8289875b78fd7bc8363d23e86b9419f0980fc) |
 | Package | `@keepithandy/pulse-engine` |
 | Baseline version | `0.1.0-alpha.0` |
-| Work items completed | **7 / 100** |
-| Next work item | **P01-08 — Build an adversarial contract suite** |
+| Work items completed | **8 / 100** |
+| Next work item | **P02-01 — Inventory the supported API** |
 
 ---
 
@@ -106,7 +106,7 @@ The default path follows the numbered phases. Dependencies below allow optional 
 
 ## Phase index
 
-Every phase is **not started**. The review evidence above describes the existing package; the checkboxes below track new work.
+Phases 02–14 are **not started**. Phase 01 completion is tracked below; the review evidence above describes the existing package.
 
 | Phase | Outcome | Items | Prerequisites |
 | --- | --- | ---: | --- |
@@ -141,7 +141,7 @@ A milestone is complete only when its evidence is recorded. Passing the current 
 
 ## Phase 01 — Correctness and boundary hardening
 
-**Status:** in progress · **Progress:** 7/8 · **Depends on:** Reviewed baseline
+**Status:** complete · **Progress:** 8/8 · **Depends on:** Reviewed baseline
 
 **Outcome:** A trustworthy baseline before the public API and feature surface grow.
 
@@ -182,8 +182,10 @@ A milestone is complete only when its evidence is recorded. Passing the current 
   - **Completed October 24, 2026.** [PR #29](https://github.com/keepithandy/pulse-engine/pull/29) preserves v1 scenario entities at `state.entities` and keeps ECS records at `state.world`; there is no implicit copy or merge. The decision includes current compatibility and future P04-06 adapter fixtures.
   - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40141684324) passed Node 22/24 across Linux, Windows, and macOS plus Chromium and WebKit; [repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40141684419) passed.
 
-- [ ] **P01-08 — Build an adversarial contract suite.** Add focused malformed-input fixtures for every confirmed finding and the associated public entry points.
+- [x] **P01-08 — Build an adversarial contract suite.** Add focused malformed-input fixtures for every confirmed finding and the associated public entry points.
   - **Done when:** Each regression demonstrates the failure before its fix and asserts unchanged state, randomness, counters, and history after rejection.
+  - **Completed October 24, 2026.** [PR #30](https://github.com/keepithandy/pulse-engine/pull/30) adds the adversarial contract matrix covering F01–F04, maps each finding to public entry points and regressions, and audits P01-04 boundary coverage.
+  - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40142052854) passed Node 22/24 across Linux, Windows, and macOS plus Chromium and WebKit; [repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40142052756) passed.
 
 ### Demonstration
 
@@ -815,7 +817,7 @@ Only retain acceptance lines relevant to the work item. Add specific behavior fr
 
 | Phase | Started | Completed | Evidence / PRs | Remaining decisions |
 | --- | --- | --- | --- | --- |
-| 01 | October 17, 2026 | — | [P01-01 / PR #22](https://github.com/keepithandy/pulse-engine/pull/22), [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/39083857321), [Integrity](https://github.com/keepithandy/pulse-engine/actions/runs/39083857325) | P01-02–P01-08 remain; phase gate still open. |
+| 01 | October 17, 2026 | October 24, 2026 | [PRs #22, #24–#30](https://github.com/keepithandy/pulse-engine/pulls?q=is%3Apr+is%3Amerged+P01), [P01-08 engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40142052854), [P01-08 integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40142052756) | Phase 01 gate complete; next is P02-01. |
 | 02 | — | — | — | — |
 | 03 | — | — | — | — |
 | 04 | — | — | — | — |
@@ -883,7 +885,7 @@ The current coverage minimums are **80% lines**, **85% functions**, and **70% br
 
 ## First implementation brief
 
-This is the preserved implementation brief for **completed P01-01** (see [PR #22](https://github.com/keepithandy/pulse-engine/pull/22)). The next unfinished item is **P01-02**, which needs its own scoped implementation brief before work starts:
+This is the preserved implementation brief for **completed P01-01** (see [PR #22](https://github.com/keepithandy/pulse-engine/pull/22)). The next unfinished item is **P02-01**, which needs its own scoped implementation brief before work starts:
 
 ```text
 Repository: keepithandy/pulse-engine
