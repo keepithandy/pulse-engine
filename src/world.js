@@ -1,4 +1,4 @@
-import { copyData } from "./data.js";
+import { assertCounter, copyData } from "./data.js";
 
 const ACTIONS = new Set([
   "world/entity.create",
@@ -72,8 +72,10 @@ export function createWorldPlugin({ id = "pulse-world", idPrefix = "entity" } = 
           }
         } else {
           do {
+            const nextEntity = world.nextEntity + 1;
+            assertCounter(nextEntity, "Entity allocation counter");
             entityId = `${idPrefix}-${String(world.nextEntity).padStart(6, "0")}`;
-            world.nextEntity += 1;
+            world.nextEntity = nextEntity;
           } while (Object.hasOwn(world.entities, entityId));
         }
         const components = action.components ?? {};
