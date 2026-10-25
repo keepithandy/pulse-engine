@@ -23,8 +23,8 @@ contracts link to the inventory.
   have distinct, accurate descriptions of their existing checks.
 - The stable-candidate classification preserves the existing pre-alpha status.
 - Examples execute successfully using package-root imports in the local checkout.
-- Required repository checks pass; the roadmap records review progress without
-  completing P02-01 before merge.
+- Required repository checks pass; the roadmap records P02-01 completion with the
+  merge and identifies P02-02 as the next work item.
 
 ## Verification boundary
 
@@ -52,6 +52,10 @@ Local validation on Node `24.21.0`:
 - `node .github/smoke/run-integrity.mjs` passed all three repository checks.
 - `git diff --check` passed.
 
-The review PR runs the existing Node/OS, Chromium, WebKit, and integrity CI gates.
-P02-01 remains in review and unchecked in the roadmap until it is merged. The
-remaining P02 items have not been started by this patch.
+[PR #31](https://github.com/keepithandy/pulse-engine/pull/31) passed all nine checks
+at implementation head `d194542a6d5c6473bdae4f618aa6fb5bd8c5c0a9`:
+[Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40148469920)
+covered Node 22/24 on Linux, Windows, and macOS plus Chromium and WebKit;
+[repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40148469904)
+passed. P02-01 completion is recorded with its approved merge on October 24, 2026.
+P02-02 is next; the remaining P02 items have not been started by this patch.
