@@ -1,6 +1,9 @@
-# Pulse Engine
+<p align="center">
+  <img src="assets/pulse-engine-banner.png" alt="Pulse Engine — deterministic simulation for event-driven worlds. A teal, blue, and violet engine core surrounds a pulse waveform." width="1200">
+</p>
 
 <div align="center">
+  <h1>Pulse Engine</h1>
   <p><strong>A deterministic simulation core for event-driven worlds.</strong></p>
   <p>Build repeatable systems, inspect every decision, and keep game content in its own layer.</p>
   <p>

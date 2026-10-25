@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="title description">
+  <title id="title">Pulse Engine</title>
+  <desc id="description">A deterministic simulation core for event-driven worlds.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101a2d"/>
+      <stop offset="1" stop-color="#172b43"/>
+    </linearGradient>
+    <linearGradient id="pulse" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#42d6c5"/>
+      <stop offset="1" stop-color="#79a9ff"/>
+    </linearGradient>
+    <linearGradient id="topFace" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a3fff0"/>
+      <stop offset="1" stop-color="#42b9c5"/>
+    </linearGradient>
+    <linearGradient id="leftFace" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#278eaa"/>
+      <stop offset="1" stop-color="#174e70"/>
+    </linearGradient>
+    <linearGradient id="rightFace" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#507fd0"/>
+      <stop offset="1" stop-color="#263f78"/>
+    </linearGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dy="10"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope=".35"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#9bb4d2" stroke-opacity=".08" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="340" rx="24" fill="url(#background)"/>
+  <rect width="1200" height="340" rx="24" fill="url(#grid)"/>
+  <circle cx="1010" cy="145" r="155" fill="#42d6c5" opacity=".06"/>
+  <g transform="rotate(-24 1010 145)" fill="none">
+    <ellipse cx="1010" cy="145" rx="112" ry="49" stroke="#79a9ff" stroke-opacity=".16"/>
+    <ellipse cx="1010" cy="145" rx="72" ry="31" stroke="#42d6c5" stroke-opacity=".22"/>
+  </g>
+  <path d="M754 251l238-78 208 48-238 79z" fill="#101a2d" opacity=".58"/>
+  <g fill="none" stroke="#79a9ff" stroke-opacity=".17" stroke-width="1">
+    <path d="M794 238l211 52m-169-66l211 52m-169-66l211 52m-169-66l211 52"/>
+    <path d="M817 232l-27 24m69-39l-27 24m69-39l-27 24m69-39l-27 24m69-39l-27 24m69-39l-27 24m69-39l-27 24"/>
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M1037 224l36-20 36 20-36 21z" fill="url(#topFace)"/>
+    <path d="M1037 224v42l36 21v-42z" fill="url(#leftFace)"/>
+    <path d="M1109 224v42l-36 21v-42z" fill="url(#rightFace)"/>
+    <path d="M1037 224l36 21 36-21m-72 0v42l36 21 36-21v-42m-36 21v42" fill="none" stroke="#b1fff4" stroke-opacity=".72" stroke-width="1.5"/>
+  </g>
+  <g fill="none" stroke="url(#pulse)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M760 181h80l25-48 37 101 40-147 38 109 27-49 25 34h92" stroke="#182b43" stroke-width="12" opacity=".9"/>
+    <path d="M760 174h80l25-48 37 101 40-147 38 109 27-49 25 34h92" stroke-width="5"/>
+    <path d="M790 225h100m182-105h56" stroke-width="2" opacity=".55"/>
+  </g>
+  <g fill="#42d6c5">
+    <circle cx="840" cy="174" r="5"/>
+    <circle cx="1020" cy="80" r="5"/>
+    <circle cx="1102" cy="174" r="5"/>
+    <circle cx="890" cy="225" r="4"/>
+  </g>
+  <rect x="72" y="64" width="180" height="28" rx="14" fill="#42d6c5" opacity=".14"/>
+  <circle cx="89" cy="78" r="4" fill="#42d6c5"/>
+  <text x="102" y="83" fill="#9be9df" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="1.8">OPEN SOURCE ENGINE</text>
+  <text x="68" y="169" fill="#f4f7fb" font-family="Segoe UI, Arial, sans-serif" font-size="58" font-weight="750" letter-spacing="1">PULSE ENGINE</text>
+  <text x="72" y="211" fill="#b9c9dc" font-family="Segoe UI, Arial, sans-serif" font-size="20">Deterministic simulation for event-driven worlds.</text>
+  <path d="M72 255h362" stroke="#42d6c5" stroke-opacity=".55" stroke-width="2"/>
+  <text x="72" y="288" fill="#8ea6c1" font-family="Segoe UI, Arial, sans-serif" font-size="14" letter-spacing=".5">REPEATABLE SYSTEMS  /  EXPLAINABLE DECISIONS  /  GAME-AGNOSTIC CORE</text>
+</svg>
