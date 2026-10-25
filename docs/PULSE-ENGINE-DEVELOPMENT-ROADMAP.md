@@ -106,7 +106,7 @@ The default path follows the numbered phases. Dependencies below allow optional 
 
 ## Phase index
 
-Phases 02–14 are **not started**. Phase 01 completion is tracked below; the review evidence above describes the existing package.
+Phase 02 is **in review** for P02-01; Phases 03–14 are **not started**. Phase 01 completion is tracked below; the review evidence above describes the existing package.
 
 | Phase | Outcome | Items | Prerequisites |
 | --- | --- | ---: | --- |
@@ -201,7 +201,7 @@ The four reproduced findings have focused regression coverage; time, cleanup, an
 
 ## Phase 02 — Public API and developer experience
 
-**Status:** not started · **Progress:** 0/7 · **Depends on:** Phase 01
+**Status:** in review · **Progress:** 0/7 · **Depends on:** Phase 01
 
 **Outcome:** A package that downstream developers can discover, type-check, and install with confidence.
 
@@ -209,6 +209,7 @@ The four reproduced findings have focused regression coverage; time, cleanup, an
 
 - [ ] **P02-01 — Inventory the supported API.** Classify root exports as stable candidates or advanced helpers and document the support boundary.
   - **Done when:** Every supported export has an example, input contract, return shape, and compatibility policy.
+  - **In review October 24, 2026.** The [public API inventory](public-api.md) covers all 25 root exports, the engine interface, and advanced subsystem interfaces. Local checks verified all 13 examples and the 70-test coverage suite. See the [implementation brief](implementation-briefs/P02-01-supported-api-inventory.md). This item remains unchecked until review and merge.
 
 - [ ] **P02-02 — Ship TypeScript declarations.** Add generics for state, actions, events, systems, rules, and plug-in context without requiring a runtime rewrite.
   - **Done when:** Consumer fixtures type-check normal usage and reject representative invalid actions and hook results.
@@ -818,7 +819,7 @@ Only retain acceptance lines relevant to the work item. Add specific behavior fr
 | Phase | Started | Completed | Evidence / PRs | Remaining decisions |
 | --- | --- | --- | --- | --- |
 | 01 | October 17, 2026 | October 24, 2026 | [PRs #22, #24–#30](https://github.com/keepithandy/pulse-engine/pulls?q=is%3Apr+is%3Amerged+P01), [P01-08 engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40142052854), [P01-08 integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40142052756) | Phase 01 gate complete; next is P02-01. |
-| 02 | — | — | — | — |
+| 02 | October 24, 2026 | — | [P02-01 implementation brief](implementation-briefs/P02-01-supported-api-inventory.md) | P02-01 is in review; phase gate remains open. |
 | 03 | — | — | — | — |
 | 04 | — | — | — | — |
 | 05 | — | — | — | — |
@@ -885,7 +886,7 @@ The current coverage minimums are **80% lines**, **85% functions**, and **70% br
 
 ## First implementation brief
 
-This is the preserved implementation brief for **completed P01-01** (see [PR #22](https://github.com/keepithandy/pulse-engine/pull/22)). The next unfinished item is **P02-01**, which needs its own scoped implementation brief before work starts:
+This is the preserved implementation brief for **completed P01-01** (see [PR #22](https://github.com/keepithandy/pulse-engine/pull/22)). The next unfinished item is **P02-01**, which has its own [implementation brief](implementation-briefs/P02-01-supported-api-inventory.md):
 
 ```text
 Repository: keepithandy/pulse-engine

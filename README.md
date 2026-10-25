@@ -280,6 +280,7 @@ The [development roadmap](docs/PULSE-ENGINE-DEVELOPMENT-ROADMAP.md) organizes th
 
 - [Development roadmap](docs/PULSE-ENGINE-DEVELOPMENT-ROADMAP.md) — phased updates, progress tracking, and implementation briefs
 
+- [Public API inventory](docs/public-api.md) — every root export, compatibility classes, inputs, results, and examples
 - [Engine contracts](docs/engine-contracts.md) — API behavior, lifecycle, snapshots, saves, scheduling, diagnostics, and scenarios
 - [Example scenarios](scenarios/) — data-driven inputs for the headless runner
 - [Source](src/) — engine implementation

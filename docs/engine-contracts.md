@@ -6,6 +6,9 @@ snapshots. Node 22+ and modern browsers with `structuredClone` and native ES mod
 are supported. CI tests Node 22/24 on Linux, Windows and macOS, plus Chromium and
 WebKit through Playwright. Physical-device testing is a separate consumer concern.
 
+See the [public API inventory](public-api.md) for every supported root export,
+compatibility classes, configuration, returned methods, and independent examples.
+
 ## JSON-safe data boundaries
 
 P01-01 accepts ordinary records with own, enumerable string-keyed data properties,
