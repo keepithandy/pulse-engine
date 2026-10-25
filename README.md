@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/pulse-engine-banner.png" alt="Pulse Engine — deterministic simulation for event-driven worlds. A teal, blue, and violet engine core surrounds a pulse waveform." width="1200">
+  <img src="assets/pulse-engine-banner.png" alt="Pulse Engine — deterministic simulation for event-driven worlds. A teal, blue, and violet engine core surrounds a pulse waveform." width="900">
 </p>
 
 <div align="center">
