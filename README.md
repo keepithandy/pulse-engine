@@ -169,6 +169,8 @@ Consumer-written hooks also need to preserve this discipline. A system that read
 
 Snapshots capture simulation state together with the revision, tick, branch identity, random state, event journal, and scheduler. Restore validates the snapshot components before replacing live state.
 
+Capture checkpoints after `dispatch()`, `step()`, or `advance()` returns. Calling `snapshot()`, `fork()`, or `exportSave()` from hooks or observers while an engine operation is running throws, preventing saves of partially completed work.
+
 The following methods operate on an existing engine:
 
 ```js

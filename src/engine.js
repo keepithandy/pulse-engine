@@ -91,9 +91,13 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
     finally { busy = false; }
     return true;
   }
-  function snapshot({ label } = {}) {
+  function captureSnapshot({ label } = {}) {
     return createSnapshotRecord({ actionSequence, branch, events: events.exportState(), label,
       randomState: random.getState(), revision, state: getState(), tick, schedules: scheduler.exportState() });
+  }
+  function snapshot(options) {
+    if (busy) throw new Error("Checkpoints are unavailable during engine operations. Capture a checkpoint after the operation returns.");
+    return captureSnapshot(options);
   }
   function installSnapshot(input) {
     const next = validateSnapshotRecord(input);
@@ -131,7 +135,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
   }
   function execute(input, { advancing = false } = {}) {
     assertAction(input);
-    const before = snapshot();
+    const before = captureSnapshot();
     const action = copyData(input);
     assertCounter(actionSequence + 1, "Action sequence");
     assertCounter(revision + 1, "Revision");

@@ -85,6 +85,14 @@ runtime handles, plug-in hooks, diagnostics and the host's pause preference. The
 must recreate the same systems/rules configuration before restoring. Old v1 snapshots
 without scheduling fields restore at tick zero with an empty schedule.
 
+Checkpoint exports (`snapshot`, `fork`, and `exportSave`) require an idle engine.
+Calls from hooks, validators, or observers during an engine operation throw, so
+they cannot capture partially published events or a tick with due jobs still pending.
+Capture autosaves after `dispatch()`, `step()`, or `advance()` returns. Ordinary
+state, event, and diagnostic reads remain available inside callbacks. An uncaught
+checkpoint error in an observer is reported with other observer errors without
+reverting the committed action. Checkpoint exports remain available after disposal.
+
 `exportSave()` writes a JSON `pulse-engine-save` envelope (version 1); `importSave()`
 migrates and validates before restore. Version 0 uses `checkpoint` instead of `snapshot`
 and has a built-in migration. `createMigrationRegistry([{ from, to, migrate }])` applies

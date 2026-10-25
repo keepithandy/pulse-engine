@@ -125,6 +125,13 @@ after disposal. Reads and snapshot/save export remain available. Unsubscribe
 functions remain safe to call. [Lifecycle failures](engine-contracts.md#plug-ins-and-diagnostics)
 describe cleanup and the limits of rollback.
 
+Checkpoint exports (`snapshot`, `fork`, and `exportSave`) throw while an engine
+operation is running, including calls from hooks, validators, and observers.
+Capture an autosave after `dispatch()`, `step()`, or `advance()` returns, when all
+events and due jobs for that operation have finished. Ordinary state, event, and
+diagnostic reads remain available inside callbacks. Uncaught observer checkpoint
+errors are collected without undoing the committed action.
+
 | Method | Input | Return / behavior |
 | --- | --- | --- |
 | `dispatch(action)` | JSON-safe object with nonblank `type`, optional nonblank `id`, and consumer fields. | Dispatch result described below; ordinary actions leave the tick unchanged. |
