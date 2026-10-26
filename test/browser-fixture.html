@@ -9,6 +9,16 @@ try {
   engine.importSave(saved); engine.advance(3);
   if (JSON.stringify(engine.snapshot()) !== JSON.stringify(expected)) throw Error('Restore diverged.');
   if (engine.getTick() !== 3 || engine.inspect().traces.length !== 6) throw Error('Unexpected tick/trace count.');
+  const asyncEngine = createEngine({ plugins: [{ id: 'async-random', async onAction({ random }) {
+    await Promise.resolve();
+    random.next();
+  } }] });
+  const beforeAsync = JSON.stringify(asyncEngine.snapshot());
+  let asyncRejected = false;
+  try { asyncEngine.dispatch({ type: 'test' }); }
+  catch (error) { asyncRejected = error instanceof TypeError && /synchronous/.test(error.message); }
+  await new Promise(resolve => setTimeout(resolve, 0));
+  if (!asyncRejected || JSON.stringify(asyncEngine.snapshot()) !== beforeAsync) throw Error('Async hook changed the checkpoint after rejection.');
   window.pulseResult = { ok: true };
 } catch (error) { window.pulseResult = { ok: false, reason: error.message }; }
 </script></html>

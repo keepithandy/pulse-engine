@@ -117,6 +117,14 @@ must return booleans. Effects use the response shape above and return events in
 `events`. Larger priorities run first; ids break ties. `conflictKey` allows only
 the first matching rule in a group to apply.
 
+Engine-issued random sampling methods expire when their synchronous plug-in hook
+or complete engine rule evaluation returns or throws. Do not retain the interface
+or its methods for observers, later actions, or asynchronous work: expired calls
+throw without changing the generator. Conditions and effects within one engine
+rule evaluation share that evaluation's interface. Promise results remain
+unsupported and fail synchronously; late Promise rejections are observed without
+accepting their results or cancelling consumer asynchronous code.
+
 ### Returned methods
 
 Methods below belong to the C-class `createEngine` contract. Every engine write
@@ -480,6 +488,9 @@ returned interface contains:
 
 The engine exposes only sampling methods to action/rule hooks. Its public
 `getRandomState` is read-only; normal checkpoint restoration owns random restoration.
+The engine scopes its sampling interfaces to synchronous processing as described
+above. A directly created generator and the random interface supplied to a standalone
+rule evaluator remain caller-owned and do not expire.
 
 ```js
 import assert from "node:assert/strict";

@@ -165,6 +165,8 @@ Reproducibility depends on keeping the starting state, seed, systems, rules, and
 
 Consumer-written hooks also need to preserve this discipline. A system that reads changing external data or generates its own uncontrolled random values can change the outcome of an otherwise identical run. Use the random interface supplied to the hook and make external inputs explicit in the actions you dispatch.
 
+Engine-issued sampling methods expire when their synchronous plug-in hook or engine rule evaluation finishes. Retaining them for observers, later actions, or asynchronous work throws without advancing the generator. Promise results remain unsupported.
+
 ## Snapshots and persistence
 
 Snapshots capture simulation state together with the revision, tick, branch identity, random state, event journal, and scheduler. Restore validates the snapshot components before replacing live state.

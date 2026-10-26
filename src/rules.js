@@ -1,4 +1,5 @@
 import { copyData, freezeData } from "./data.js";
+import { synchronousResult } from "./hooks.js";
 
 export function createRuleEvaluator(rules = []) {
   if (!Array.isArray(rules)) throw new TypeError("Rules must be an array.");
@@ -23,14 +24,13 @@ export function createRuleEvaluator(rules = []) {
         continue;
       }
       const context = () => ({ action: freezeData(copyData(action)), state: copyData(candidate), random, tick });
-      const matches = rule.condition(context());
+      const matches = synchronousResult(rule.condition(context()), "Rule conditions must be synchronous.");
       if (typeof matches !== "boolean") throw new TypeError(`Rule ${rule.id} condition must return a boolean.`);
       if (!matches) {
         if (collectTraces) traces.push({ ruleId: rule.id, status: "skipped", reason: "Condition was false.", effects: [] });
         continue;
       }
-      const response = rule.effect(context()) ?? {};
-      if (response && typeof response.then === "function") throw new TypeError("Rules must be synchronous.");
+      const response = synchronousResult(rule.effect(context()), "Rules must be synchronous.") ?? {};
       if (response.accepted === false) {
         if (collectTraces) traces.push({ ruleId: rule.id, status: "rejected", reason: String(response.reason ?? "Rule rejected the action."), effects: [] });
         return { accepted: false, reason: response.reason ?? `Rejected by ${rule.id}`, traces, events: [], state };

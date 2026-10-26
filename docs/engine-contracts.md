@@ -46,6 +46,15 @@ claims `conflictKey`, lower rules in that group are skipped. False conditions an
 conflicts have explicit trace reasons. `getExplanation(actionId)` reads the latest
 bounded record for an action. Rejected attempts do not consume committed action ids.
 
+Random sampling methods are valid only during the synchronous `onAction` or
+`beforeTick` call, or the complete engine rule evaluation, that received them.
+They expire when that call or evaluation returns or throws. Retained interfaces
+and destructured sampling methods then throw without advancing the generator,
+including during observers, later actions, and continuations of rejected async
+hooks. Each new call or evaluation receives a fresh interface. Promise results
+remain unsupported; their eventual rejections are observed, but the engine cannot
+cancel consumer asynchronous code or reverse its external side effects.
+
 ## Events
 
 Envelopes contain `version: 1`, `id`, `type`, `tick`, `source`, `payload` and `metadata`.

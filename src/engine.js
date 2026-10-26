@@ -1,5 +1,6 @@
 import { assertCounter, copyData, freezeData } from "./data.js";
 import { createEventJournal } from "./events.js";
+import { synchronousResult } from "./hooks.js";
 import { createPluginRegistry } from "./plugins.js";
 import { createSeededRandom } from "./random.js";
 import { createRuleEvaluator } from "./rules.js";
@@ -64,9 +65,17 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
     return Object.freeze({ pluginId, getEvents: events.read, getState, getTick, getRandomState: random.getState });
   }
   function invoke(hook, context) {
-    const response = hook(context);
-    if (response && typeof response.then === "function") throw new TypeError("Engine hooks must be synchronous.");
-    return response;
+    let active = true;
+    const scopedRandom = context.random && Object.freeze(Object.fromEntries(
+      Object.entries(context.random).map(([name, method]) => [name, (...args) => {
+        if (!active) throw new Error("Random helpers are only available during synchronous engine processing.");
+        return method(...args);
+      }])
+    ));
+    let response;
+    try { response = hook(scopedRandom ? { ...context, random: scopedRandom } : context); }
+    finally { active = false; }
+    return synchronousResult(response, "Engine hooks must be synchronous.");
   }
   function registerPlugin(plugin) {
     assertMutable();
@@ -172,7 +181,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
           if (reason !== null) return reject(reason);
         }
       }
-      const decision = evaluator.evaluate({ action, state: candidateState, random: randomApi, tick: targetTick, collectTraces: diagnostics });
+      const decision = invoke(evaluator.evaluate, { action, state: candidateState, random: randomApi, tick: targetTick, collectTraces: diagnostics });
       traces = decision.traces;
       if (!decision.accepted) return reject(decision.reason);
       if (advancing) scheduler.validateDue(targetTick);
