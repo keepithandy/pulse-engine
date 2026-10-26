@@ -214,6 +214,7 @@ The four reproduced findings have focused regression coverage; time, cleanup, an
 
 - [ ] **P02-02 — Ship TypeScript declarations.** Add generics for state, actions, events, systems, rules, and plug-in context without requiring a runtime rewrite.
   - **Done when:** Consumer fixtures type-check normal usage and reject representative invalid actions and hook results.
+  - **In progress October 25, 2026:** The [declaration baseline brief](implementation-briefs/P02-02-typescript-declarations.md) describes root declarations and strict NodeNext/Bundler fixtures checked from both the checkout and an installed tarball. The item stays unchecked pending review and merge.
 
 - [ ] **P02-03 — Introduce structured errors.** Define documented error codes, categories, causes, and JSON-safe summaries while preserving useful messages.
   - **Done when:** Callers can distinguish validation, rejection, compatibility, and lifecycle failures without parsing prose.
