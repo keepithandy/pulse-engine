@@ -642,8 +642,9 @@ assert.equal(registry.remove("missing"), null);
 
 ## Scope of this inventory
 
-P02-01 documents the current public boundary and compatibility classes. TypeScript
-declarations, structured errors, new export paths/package metadata, isolated installed
-consumers, an organized executable-example suite, and a full guide/reference navigation
-system remain P02-02 through P02-07 work. This inventory does not declare those items
-complete or establish a stable release.
+P02-01 documents the current public boundary and compatibility classes. The proposed
+[TypeScript declaration baseline](typescript.md) supplies package-root types and
+strict consumer checks for P02-02; that item remains pending review and merge.
+Structured errors, broader export paths/package metadata, isolated runtime/CLI
+consumers, executable examples, and full guide/reference navigation remain P02-03
+through P02-07 work. This inventory does not establish a stable release.

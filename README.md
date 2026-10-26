@@ -88,6 +88,10 @@ node bin/pulse-run.js --scenario scenarios/resource-network.json --ticks 10
 
 The runner writes deterministic JSON to stdout and exits with a nonzero status for invalid input or runtime failures.
 
+TypeScript consumers can import package-root declarations with generic state, action,
+event, system, and rule types. See the [TypeScript guide](docs/typescript.md) for
+examples, runtime validation limits, and `npm run test:types`.
+
 ## Use the world model
 
 The generic entity/component world is a plug-in. Consumers define what their components mean and keep their game-specific systems outside the engine.
@@ -243,6 +247,7 @@ Run the checks locally:
 
 ```sh
 npm run lint
+npm run test:types
 npm test
 npm run test:coverage
 npm run check:package

@@ -3,7 +3,14 @@
   "version": "0.1.0-alpha.0",
   "description": "A deterministic, event-driven JavaScript simulation engine.",
   "type": "module",
-  "exports": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
   "bin": {
     "pulse-run": "./bin/pulse-run.js"
   },
@@ -16,6 +23,7 @@
   ],
   "scripts": {
     "test": "node --test",
+    "test:types": "node tools/check-types.mjs",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/*.js --test-coverage-lines=80 --test-coverage-functions=85 --test-coverage-branches=70",
     "lint": "node tools/check-source.mjs",
     "smoke": "node bin/pulse-run.js --scenario scenarios/resource-network.json --ticks 100",
@@ -26,6 +34,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "playwright": "1.62.1"
+    "playwright": "1.62.1",
+    "typescript": "7.0.2"
   }
 }
