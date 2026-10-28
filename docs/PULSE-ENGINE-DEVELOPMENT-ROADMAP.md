@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Roadmap status:** active implementation. The reviewed baseline remains pinned for historical evidence; **P01-01 through P01-08 and P02-01 are completed and merged**, and the remaining 91 work items are not yet complete.
+> **Roadmap status:** Phases 01–02 are implemented and merged; **16 of 100** work items are complete. The reviewed baseline remains pinned as historical evidence. Phase 03 is next.
 
 | Document field | Value |
 | --- | --- |
@@ -22,8 +22,8 @@
 | Reviewed baseline | [`31a8289`](https://github.com/keepithandy/pulse-engine/commit/31a8289875b78fd7bc8363d23e86b9419f0980fc) |
 | Package | `@keepithandy/pulse-engine` |
 | Baseline version | `0.1.0-alpha.0` |
-| Work items completed | **9 / 100** |
-| Next work item | **P02-02 — Ship TypeScript declarations** |
+| Work items completed | **16 / 100** |
+| Next work item | **P03-01 — Define a replay format** |
 
 ---
 
@@ -106,7 +106,7 @@ The default path follows the numbered phases. Dependencies below allow optional 
 
 ## Phase index
 
-Phase 02 is **in progress**, with P02-01 complete; Phases 03–14 are **not started**. Phase 01 completion is tracked below; the review evidence above describes the existing package.
+Phase 02 is **complete**; Phases 03–14 are **not started**. Phase 01 completion is tracked below; the review evidence above describes the existing package.
 
 | Phase | Outcome | Items | Prerequisites |
 | --- | --- | ---: | --- |
@@ -201,7 +201,7 @@ The four reproduced findings have focused regression coverage; time, cleanup, an
 
 ## Phase 02 — Public API and developer experience
 
-**Status:** in progress · **Progress:** 1/7 · **Depends on:** Phase 01
+**Status:** complete · **Progress:** 7/7 · **Depends on:** Phase 01
 
 **Outcome:** A package that downstream developers can discover, type-check, and install with confidence.
 
@@ -212,24 +212,29 @@ The four reproduced findings have focused regression coverage; time, cleanup, an
   - **Completed October 24, 2026.** [PR #31](https://github.com/keepithandy/pulse-engine/pull/31) adds the [public API inventory](public-api.md), covering all 25 root exports, 25 engine methods, compatibility classes, and advanced subsystem interfaces. Local checks verified all 13 examples and the 70-test coverage suite. See the [implementation brief](implementation-briefs/P02-01-supported-api-inventory.md).
   - **Verification:** [Engine quality](https://github.com/keepithandy/pulse-engine/actions/runs/40148469920) passed Node 22/24 across Linux, Windows, and macOS plus Chromium and WebKit; [repository integrity](https://github.com/keepithandy/pulse-engine/actions/runs/40148469904) passed.
 
-- [ ] **P02-02 — Ship TypeScript declarations.** Add generics for state, actions, events, systems, rules, and plug-in context without requiring a runtime rewrite.
+- [x] **P02-02 — Ship TypeScript declarations.** Add generics for state, actions, events, systems, rules, and plug-in context without requiring a runtime rewrite.
   - **Done when:** Consumer fixtures type-check normal usage and reject representative invalid actions and hook results.
-  - **In progress October 25, 2026:** The [declaration baseline brief](implementation-briefs/P02-02-typescript-declarations.md) describes root declarations and strict NodeNext/Bundler fixtures checked from both the checkout and an installed tarball. The item stays unchecked pending review and merge.
+  - **Completed October 26, 2026.** [PR #34](https://github.com/keepithandy/pulse-engine/pull/34): Root declarations, strict NodeNext/Bundler fixture checks, and isolated installed TypeScript consumption.
 
-- [ ] **P02-03 — Introduce structured errors.** Define documented error codes, categories, causes, and JSON-safe summaries while preserving useful messages.
+- [x] **P02-03 — Introduce structured errors.** Define documented error codes, categories, causes, and JSON-safe summaries while preserving useful messages.
   - **Done when:** Callers can distinguish validation, rejection, compatibility, and lifecycle failures without parsing prose.
+  - **Completed October 28, 2026.** [PR #39](https://github.com/keepithandy/pulse-engine/pull/39): Structured failure codes, categories, JSON-safe cause summaries and regression coverage at key public boundaries.
 
-- [ ] **P02-04 — Add package metadata and export checks.** Complete repository, homepage, issue tracker, keywords, types, and deliberate export paths.
+- [x] **P02-04 — Add package metadata and export checks.** Complete repository, homepage, issue tracker, keywords, types, and deliberate export paths.
   - **Done when:** A package validator catches missing destinations and private-file leakage; supported imports resolve from the tarball.
+  - **Completed October 28, 2026.** [PR #35](https://github.com/keepithandy/pulse-engine/pull/35): Discoverability metadata, export and tarball allowlist validation, with executable-example packaging completed in the Phase 02 follow-up.
 
-- [ ] **P02-05 — Test installed consumers.** Replace dry-run-only confidence with real temporary tarball installation in isolated consumer fixtures.
+- [x] **P02-05 — Test installed consumers.** Replace dry-run-only confidence with real temporary tarball installation in isolated consumer fixtures.
   - **Done when:** Root imports and the installed CLI work outside the repository with development dependencies absent.
+  - **Completed October 28, 2026.** [PR #38](https://github.com/keepithandy/pulse-engine/pull/38): Isolated tarball installation verifying JavaScript root imports, private deep-import rejection and CLI execution.
 
-- [ ] **P02-06 — Organize executable examples.** Add small examples for dispatch, rules, world entities, schedules, saves, and inspection.
+- [x] **P02-06 — Organize executable examples.** Add small examples for dispatch, rules, world entities, schedules, saves, and inspection.
   - **Done when:** CI executes the examples against the public package surface and checks their documented outcomes.
+  - **Completed October 28, 2026.** [PR #36](https://github.com/keepithandy/pulse-engine/pull/36): Six independent deterministic executable examples, exercised by the test suite.
 
-- [ ] **P02-07 — Separate guides from reference.** Provide getting-started, API-reference, troubleshooting, and compatibility pages with a concise navigation index.
+- [x] **P02-07 — Separate guides from reference.** Provide getting-started, API-reference, troubleshooting, and compatibility pages with a concise navigation index.
   - **Done when:** A new contributor can run a scenario and locate every supported API without reading engine internals.
+  - **Completed October 28, 2026.** [PR #37](https://github.com/keepithandy/pulse-engine/pull/37): Getting-started, troubleshooting, compatibility and documentation-index guides.
 
 ### Demonstration
 
@@ -237,7 +242,7 @@ A clean JavaScript consumer and a clean TypeScript consumer import the packed pa
 
 ### Phase completion gate
 
-The packed artifact, public exports, examples, and declarations agree.
+The packed artifact, public exports, examples, and declarations agree. Phase 02's implementation PRs are merged; at merge time, some macOS matrix jobs were still queued, while the completed Linux, Windows, and browser checks reported success. The follow-up package test also verifies that examples survive a real tarball installation.
 
 [Return to phase index](#phase-index)
 
