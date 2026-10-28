@@ -16,3 +16,4 @@ export {
   validateSnapshotRecord
 } from "./snapshots.js";
 export { summarizePulseError } from "./errors.js";
+export { REPLAY_FORMAT, REPLAY_VERSION, createReplayRecord, validateReplayRecord } from "./replay.js";
