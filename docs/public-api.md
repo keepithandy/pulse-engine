@@ -1,6 +1,6 @@
 # Public API inventory
 
-This inventory covers all **26 named exports** from `@keepithandy/pulse-engine`
+This inventory covers all **30 named exports** from `@keepithandy/pulse-engine`
 at `0.1.0-alpha.0`, plus the methods and hook contracts they expose. It was checked
 against `src/index.js` and its implementations at baseline `ec4c887`.
 See [engine contracts](engine-contracts.md) for the detailed behavioral boundaries.
@@ -50,6 +50,10 @@ The linked sections provide usage examples and the returned object's methods.
 | Export | Class | Input contract | Result and example |
 | --- | --- | --- | --- |
 | `summarizePulseError` | C | Thrown value, including unknown non-Error values. | JSON-safe `{ code, category, message, cause }`; [structured errors](errors.md). |
+| `REPLAY_FORMAT` | C | None; constant. | `"pulse-engine-replay"`; [replay input protocol](replay-format.md). |
+| `REPLAY_VERSION` | C | None; constant. | `1`; [replay input protocol](replay-format.md). |
+| `createReplayRecord` | A | Host-owned configuration id, original seed, complete initial snapshot and optional ordered commands. | Frozen detached input record; [replay inputs](#replay-input-records). |
+| `validateReplayRecord` | A | JSON-safe replay envelope v1. | Frozen detached validated replay record or throws; [replay inputs](#replay-input-records). |
 | `createEngine` | C | Optional configuration object; JSON-safe initial state, runtime systems/rules, numeric or string seed, and the options below. | Frozen engine interface; [engine API](#engine-api). |
 | `createEngineFromScenario` | C | Scenario v1 data plus an explicit system-factory allowlist and optional validation/engine options. | Engine initialized from scenario data; [scenarios](#scenarios). |
 | `validateScenario` | C | Scenario data and optional synchronous `validateGameData` callback. | `{ valid, errors, value }`; invalid data has `value: null`; [scenarios](#scenarios). |
@@ -641,11 +645,27 @@ assert.equal(registry.remove("addon").id, "addon");
 assert.equal(registry.remove("missing"), null);
 ```
 
+## Replay input records
+
+The v1 replay protocol is independent from saved snapshot envelopes and the bounded event journal. `createReplayRecord({ configurationId, seed, initialSnapshot, commands })` builds a deeply frozen input record and defaults `commands` to `[]`; `validateReplayRecord(input)` accepts an existing detached envelope and checks format/version, configuration id, seed/checkpoint identity, nested checkpoint records and 1-based contiguous external input commands. Neither helper executes, captures or replays a simulation. See the [record reference](replay-format.md), [JSON Schema](replay.schema.json) and [full fixture](../fixtures/replay/counter-v1.json).
+
+```js
+import { createEngine, createReplayRecord, validateReplayRecord } from "@keepithandy/pulse-engine";
+const engine = createEngine({ seed: "my-seed" });
+const record = createReplayRecord({
+  configurationId: "test-v1", seed: "my-seed", initialSnapshot: engine.snapshot(),
+  commands: [{ sequence: 1, kind: "step" }]
+});
+const parsed = validateReplayRecord(JSON.parse(JSON.stringify(record)));
+console.log(parsed.commands[0].kind); // step
+engine.dispose();
+```
+
 ## Scope of this inventory
 
-P02-01 documents the current public boundary and compatibility classes. The proposed
-[TypeScript declaration baseline](typescript.md) supplies package-root types and
-strict consumer checks for P02-02; that item remains pending review and merge.
+P02-01 documented the Phase 02 public boundary and compatibility classes. The
+[TypeScript declaration baseline](typescript.md) and strict consumer checks were
+merged in PR #34.
 P02-03 adds structured error metadata at selected public boundaries. Phase 02
 also ships package validation, isolated JavaScript and TypeScript consumers, tested
 examples, and focused guides. This inventory does not establish a stable release.
