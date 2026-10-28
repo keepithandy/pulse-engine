@@ -290,6 +290,11 @@ The [development roadmap](docs/PULSE-ENGINE-DEVELOPMENT-ROADMAP.md) organizes th
 
 ## Documentation
 
+- [Documentation index](docs/index.md) — guided entry point for setup, API, troubleshooting, and compatibility
+- [Getting started](docs/getting-started.md) — first scenario and first action
+- [Troubleshooting](docs/troubleshooting.md) — common failures and debugging
+- [Compatibility](docs/compatibility.md) — pre-alpha versioning and save-upgrade boundaries
+
 - [Development roadmap](docs/PULSE-ENGINE-DEVELOPMENT-ROADMAP.md) — phased updates, progress tracking, and implementation briefs
 
 - [Public API inventory](docs/public-api.md) — every root export, compatibility classes, inputs, results, and examples
