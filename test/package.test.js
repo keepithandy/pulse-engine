@@ -20,6 +20,6 @@ test("package validation accepts declared entry points and safe files", () => {
 test("package validation rejects private files, missing entry points and unsafe paths", () => {
   assert.throws(() => validatePackage(manifest, [...files, { path: "test/secret.js" }], exists), /unexpected packed file/);
   assert.throws(() => validatePackage(manifest, files.filter(file => file.path !== "bin/pulse-run.js"), exists), /omitted from tarball/);
-  assert.throws(() => validatePackage({ ...manifest, types: "./../secret" }, files, exists), /unsafe destination/);
+  assert.throws(() => validatePackage({ ...manifest, types: "./../secret", exports: { ".": { ...manifest.exports["."], types: "./../secret" } } }, files, exists), /unsafe destination/);
   assert.throws(() => validatePackage({ ...manifest, keywords: [] }, files, exists), /discoverability metadata/);
 });
