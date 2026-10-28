@@ -1,0 +1,121 @@
+{
+  "format": "pulse-engine-replay",
+  "version": 1,
+  "engineVersion": "0.1.0-alpha.0",
+  "configurationId": "fixtures/counter-v1",
+  "seed": 17,
+  "initialPaused": false,
+  "initialSnapshot": {
+    "format": "pulse-engine-snapshot",
+    "version": 1,
+    "engineVersion": "0.1.0-alpha.0",
+    "label": null,
+    "branch": {
+      "id": "main",
+      "parentId": null
+    },
+    "revision": 0,
+    "actionSequence": 0,
+    "tick": 0,
+    "schedules": {
+      "version": 1,
+      "sequence": 1,
+      "jobs": [
+        {
+          "id": "schedule-000001",
+          "sequence": 1,
+          "action": {
+            "type": "count/add"
+          },
+          "at": 2,
+          "interval": null,
+          "remaining": 1
+        }
+      ]
+    },
+    "state": {
+      "count": 0
+    },
+    "randomState": {
+      "algorithm": "mulberry32-v1",
+      "seed": 17,
+      "state": 17
+    },
+    "events": {
+      "format": "pulse-event-journal",
+      "version": 1,
+      "sequence": 0,
+      "history": []
+    }
+  },
+  "commands": [
+    {
+      "sequence": 1,
+      "kind": "dispatch",
+      "action": {
+        "type": "count/add"
+      },
+      "outcome": {
+        "status": "accepted"
+      }
+    },
+    {
+      "sequence": 2,
+      "kind": "schedule",
+      "action": {
+        "type": "count/add"
+      },
+      "options": {
+        "at": 4,
+        "id": "manual-job"
+      },
+      "outcome": {
+        "status": "accepted"
+      }
+    },
+    {
+      "sequence": 3,
+      "kind": "step",
+      "outcome": {
+        "status": "accepted"
+      }
+    },
+    {
+      "sequence": 4,
+      "kind": "advance",
+      "count": 2,
+      "outcome": {
+        "status": "accepted"
+      }
+    },
+    {
+      "sequence": 5,
+      "kind": "pause",
+      "outcome": {
+        "status": "accepted"
+      }
+    },
+    {
+      "sequence": 6,
+      "kind": "resume",
+      "outcome": {
+        "status": "accepted"
+      }
+    },
+    {
+      "sequence": 7,
+      "kind": "cancelSchedule",
+      "id": "manual-job",
+      "outcome": {
+        "status": "accepted"
+      }
+    },
+    {
+      "sequence": 8,
+      "kind": "step",
+      "outcome": {
+        "status": "accepted"
+      }
+    }
+  ]
+}

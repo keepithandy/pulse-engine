@@ -91,6 +91,28 @@ pulse.createMigrationRegistry([{ from: 0, to: 1, migrate: input => ({ ...input, 
 void [pulse.ENGINE_VERSION, pulse.SNAPSHOT_FORMAT, pulse.SNAPSHOT_VERSION, pulse.SAVE_FORMAT, pulse.SAVE_VERSION, pulse.SCENARIO_VERSION, published];
 const picked: "a" | "b" = pulse.createSeededRandom().pick(["a", "b"] as const);
 void picked;
+// P03-01: replay input commands are typed and distinguish host-originated calls.
+const replayInput: pulse.ReplayCommand<Command> = {
+  sequence: 1, kind: "dispatch", action: { type: "add", amount: 2 }, outcome: { status: "accepted" }
+};
+const replay = pulse.createReplayRecord({
+  configurationId: "typed-counter-v1", seed: 0, initialSnapshot: snapshot, initialPaused: false,
+  commands: [replayInput, { sequence: 2, kind: "advance", count: 1 }]
+});
+const replayVersion: 1 = replay.version;
+const checkedReplay = pulse.validateReplayRecord(replay);
+const replayFormat: "pulse-engine-replay" = pulse.REPLAY_FORMAT;
+void [replayVersion, checkedReplay, replayFormat, pulse.REPLAY_VERSION];
+// @ts-expect-error Replays have a discriminated command kind.
+const invalidReplayKind: pulse.ReplayCommand<Command> = { sequence: 2, kind: "internal-tick" };
+// @ts-expect-error Dispatch payload must match the declared union.
+const invalidReplayAction: pulse.ReplayCommand<Command> = { sequence: 1, kind: "dispatch", action: { type: "add", amount: "two" } };
+// @ts-expect-error Advance requires an explicit count.
+const invalidReplayAdvance: pulse.ReplayCommand<Command> = { sequence: 3, kind: "advance" };
+// @ts-expect-error Cannot attach a rejection reason to an accepted outcome.
+const invalidReplayOutcome: pulse.ReplayOutcome = { status: "accepted", reason: "failed" };
+void [invalidReplayKind, invalidReplayAction, invalidReplayAdvance, invalidReplayOutcome];
+
 engine.dispose();
 
 // Every expected error must remain an error; tsc rejects unused directives.
