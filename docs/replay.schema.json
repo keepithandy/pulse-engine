@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/keepithandy/pulse-engine/blob/main/fixtures/replay/replay.schema.json",
+  "$id": "https://github.com/keepithandy/pulse-engine/blob/main/docs/replay.schema.json",
   "title": "Pulse Engine external-input replay record v1",
   "description": "P03-01: host-authored input protocol, not event history. Runtime validation also enforces JSON-safe data, exact engine compatibility, contiguous sequences, initial PRNG seed, scheduler invariants and known command shapes.",
   "type": "object",
