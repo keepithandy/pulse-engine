@@ -1,6 +1,6 @@
 # Public API inventory
 
-This inventory covers all **25 named exports** from `@keepithandy/pulse-engine`
+This inventory covers all **26 named exports** from `@keepithandy/pulse-engine`
 at `0.1.0-alpha.0`, plus the methods and hook contracts they expose. It was checked
 against `src/index.js` and its implementations at baseline `ec4c887`.
 See [engine contracts](engine-contracts.md) for the detailed behavioral boundaries.
@@ -33,8 +33,8 @@ Engine state, actions, events, scenarios, and saved records use the existing
 [JSON-safe data contract](engine-contracts.md#json-safe-data-boundaries). Functions
 belong in runtime systems, rules, validators, and listeners. Hooks execute synchronously.
 Read methods return detached data except where an advanced helper explicitly says
-otherwise. Error messages are currently descriptive strings; structured error codes
-remain P02-03 work.
+otherwise. Selected validation, rejection, compatibility, and lifecycle boundaries now have
+[structured error metadata](errors.md); other plug-in errors may remain unstructured.
 
 The examples use Node's assertion library to make the expected results explicit.
 Each JavaScript block is independent and can run in a Node 22+ ES module within this
@@ -49,6 +49,7 @@ The linked sections provide usage examples and the returned object's methods.
 
 | Export | Class | Input contract | Result and example |
 | --- | --- | --- | --- |
+| `summarizePulseError` | C | Thrown value, including unknown non-Error values. | JSON-safe `{ code, category, message, cause }`; [structured errors](errors.md). |
 | `createEngine` | C | Optional configuration object; JSON-safe initial state, runtime systems/rules, numeric or string seed, and the options below. | Frozen engine interface; [engine API](#engine-api). |
 | `createEngineFromScenario` | C | Scenario v1 data plus an explicit system-factory allowlist and optional validation/engine options. | Engine initialized from scenario data; [scenarios](#scenarios). |
 | `validateScenario` | C | Scenario data and optional synchronous `validateGameData` callback. | `{ valid, errors, value }`; invalid data has `value: null`; [scenarios](#scenarios). |
