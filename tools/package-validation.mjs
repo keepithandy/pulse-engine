@@ -13,9 +13,12 @@ export function validatePackage(manifest, packedFiles, exists = existsSync) {
   if (!packedFiles.length) fail("empty package.");
   for (const entry of packedFiles) {
     const name = entry.path.replace(/\\/g, "/");
-    if (!/^(src\/|bin\/|scenarios\/|docs\/|README\.md$|LICENSE$|package\.json$)/.test(name)) fail(`private or unexpected packed file: ${name}`);
+    if (!/^(src\/|bin\/|scenarios\/|examples\/|docs\/|README\.md$|LICENSE$|package\.json$)/.test(name)) fail(`private or unexpected packed file: ${name}`);
   }
   for (const target of destinations) if (!packedFiles.some(file => file.path === target.slice(2))) fail(`destination omitted from tarball: ${target}`);
+  for (const name of ["dispatch", "rules", "world", "schedules", "saves", "inspection"]) {
+    if (!packedFiles.some(file => file.path === `examples/${name}.mjs`)) fail(`executable example omitted from tarball: ${name}`);
+  }
   return packedFiles.length;
 }
 
