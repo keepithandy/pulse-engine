@@ -1,0 +1,12 @@
+import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { validatePackage } from "./package-validation.mjs";
+const root = JSON.parse(readFileSync("package.json", "utf8"));
+const npm = process.env.npm_execpath;
+if (!npm) throw new Error("Run this command through npm run check:package.");
+const result = spawnSync(process.execPath, [npm, "pack", "--dry-run", "--json", "--ignore-scripts"], { encoding: "utf8" });
+if (result.status !== 0) throw new Error(result.stderr || result.error?.message || "npm pack failed.");
+const metadata = JSON.parse(result.stdout);
+if (metadata.length !== 1) throw new Error("Expected exactly one package tarball.");
+const count = validatePackage(root, metadata[0].files);
+console.log(`Package integrity passed (${count} files; destinations and private-file allowlist verified).`);

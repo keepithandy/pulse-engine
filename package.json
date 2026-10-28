@@ -27,7 +27,7 @@
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/*.js --test-coverage-lines=80 --test-coverage-functions=85 --test-coverage-branches=70",
     "lint": "node tools/check-source.mjs",
     "smoke": "node bin/pulse-run.js --scenario scenarios/resource-network.json --ticks 100",
-    "check:package": "npm pack --dry-run --json"
+    "check:package": "node tools/check-package.mjs"
   },
   "engines": {
     "node": ">=22"
@@ -36,5 +36,21 @@
   "devDependencies": {
     "playwright": "1.62.1",
     "typescript": "7.0.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keepithandy/pulse-engine.git"
+  },
+  "homepage": "https://github.com/keepithandy/pulse-engine#readme",
+  "bugs": {
+    "url": "https://github.com/keepithandy/pulse-engine/issues"
+  },
+  "keywords": [
+    "simulation",
+    "deterministic",
+    "event-driven",
+    "game-engine",
+    "typescript",
+    "scheduler"
+  ]
 }
