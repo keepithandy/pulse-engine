@@ -256,7 +256,8 @@ export function createEngineFromScenario<A extends Action = AnyAction, E extends
   options?: Omit<EngineOptions<ScenarioState, A, E, I>, "initialState" | "systems"> & ScenarioValidationOptions & { systemRegistry?: SystemRegistry<A, E> }
 ): Readonly<Engine<ScenarioState, A, E, I>>;
 export const exampleSystemRegistry: Readonly<SystemRegistry>;
-\n/** Structured public failure diagnostic; raw internal and plug-in errors may have unknown codes. */
+
+/** Structured public failure diagnostic; raw internal and plug-in errors may have unknown codes. */
 export function summarizePulseError(error: unknown): {
   code: string; category: string; message: string;
   cause: { name: string; message: string; code: string | null } | null;
