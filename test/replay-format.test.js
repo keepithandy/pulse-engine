@@ -142,3 +142,17 @@ test("structured validation and compatibility errors are inspectable", () => {
   assert.throws(() => validateReplayRecord(wrongVersion), error => error instanceof RangeError && error.code === "PULSE_COMPATIBILITY");
   assert.throws(() => createReplayRecord({ configurationId: "x", seed: 17 }), /initialSnapshot/);
 });
+
+test("published JSON Schema covers all external commands and the full starting snapshot", () => {
+  const schema = JSON.parse(readFileSync(new URL("../docs/replay.schema.json", import.meta.url), "utf8"));
+  assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
+  assert.equal(schema.properties.format.const, REPLAY_FORMAT);
+  assert.equal(schema.properties.version.const, REPLAY_VERSION);
+  assert.equal(schema.additionalProperties, false);
+  assert.ok(schema.required.includes("initialSnapshot"));
+  assert.ok(schema.$defs.snapshot.required.includes("schedules"));
+  assert.ok(schema.$defs.snapshot.required.includes("randomState"));
+  const commandKinds = schema.$defs.command.oneOf.map(shape => shape.properties.kind.const).sort();
+  assert.deepEqual(commandKinds, ["advance", "cancelSchedule", "dispatch", "pause", "resume", "schedule", "step"].sort());
+  assert.ok(schema.$defs.command.oneOf.every(shape => shape.required.includes("sequence") && shape.additionalProperties === false));
+});
