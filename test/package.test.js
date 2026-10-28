@@ -11,7 +11,7 @@ const manifest = {
   exports: { ".": { types: "./src/index.d.ts", import: "./src/index.js" } },
   bin: { "pulse-run": "./bin/pulse-run.js" }
 };
-const files = ["src/index.js", "src/index.d.ts", "bin/pulse-run.js", "README.md", "package.json"].map(path => ({ path }));
+const files = ["src/index.js", "src/index.d.ts", "bin/pulse-run.js", "README.md", "package.json", ...["dispatch", "rules", "world", "schedules", "saves", "inspection"].map(name => `examples/${name}.mjs`)].map(path => ({ path }));
 const exists = () => true;
 
 test("package validation accepts declared entry points and safe files", () => {
@@ -19,6 +19,7 @@ test("package validation accepts declared entry points and safe files", () => {
 });
 test("package validation rejects private files, missing entry points and unsafe paths", () => {
   assert.throws(() => validatePackage(manifest, [...files, { path: "test/secret.js" }], exists), /unexpected packed file/);
+  assert.throws(() => validatePackage(manifest, files.filter(file => file.path !== "examples/dispatch.mjs"), exists), /executable example omitted/);
   assert.throws(() => validatePackage(manifest, files.filter(file => file.path !== "bin/pulse-run.js"), exists), /omitted from tarball/);
   assert.throws(() => validatePackage({ ...manifest, types: "./../secret", exports: { ".": { ...manifest.exports["."], types: "./../secret" } } }, files, exists), /unsafe destination/);
   assert.throws(() => validatePackage({ ...manifest, keywords: [] }, files, exists), /discoverability metadata/);

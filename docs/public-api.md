@@ -646,6 +646,6 @@ assert.equal(registry.remove("missing"), null);
 P02-01 documents the current public boundary and compatibility classes. The proposed
 [TypeScript declaration baseline](typescript.md) supplies package-root types and
 strict consumer checks for P02-02; that item remains pending review and merge.
-P02-03 adds structured error metadata at selected public boundaries. P02-04
-through P02-07 have separate implementation work; merge and CI evidence determine
-their completion. This inventory does not establish a stable release.
+P02-03 adds structured error metadata at selected public boundaries. Phase 02
+also ships package validation, isolated JavaScript and TypeScript consumers, tested
+examples, and focused guides. This inventory does not establish a stable release.

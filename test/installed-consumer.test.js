@@ -42,6 +42,10 @@ engine.dispose();`;
     assert.equal(imported.status, 0, imported.stderr);
     assert.deepEqual(JSON.parse(imported.stdout), { accepted: true, count: 2, saveVersion: 1, privateExportBlocked: true });
 
+    const installedExample = exec(["node_modules/@keepithandy/pulse-engine/examples/dispatch.mjs"], consumer);
+    assert.equal(installedExample.status, 0, installedExample.stderr);
+    assert.deepEqual(JSON.parse(installedExample.stdout), { accepted: true, count: 1 });
+
     const cli = exec(["node_modules/@keepithandy/pulse-engine/bin/pulse-run.js", "--scenario", join(root, "scenarios/minimal.json"), "--ticks", "3"], consumer);
     assert.equal(cli.status, 0, cli.stderr);
     assert.equal(JSON.parse(cli.stdout).tick, 3);
