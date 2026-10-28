@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Roadmap status:** Phases 01–02 are implemented and merged; **16 of 100** work items are complete. The reviewed baseline remains pinned as historical evidence. Phase 03 has begun with P03-01 in review.
+> **Roadmap status:** Phases 01–02 and P03-01 are implemented and merged; **17 of 100** work items are complete. The reviewed baseline remains pinned as historical evidence. P03-02 command recording is in review.
 
 | Document field | Value |
 | --- | --- |
@@ -22,8 +22,8 @@
 | Reviewed baseline | [`31a8289`](https://github.com/keepithandy/pulse-engine/commit/31a8289875b78fd7bc8363d23e86b9419f0980fc) |
 | Package | `@keepithandy/pulse-engine` |
 | Baseline version | `0.1.0-alpha.0` |
-| Work items completed | **16 / 100** |
-| Next work item | **P03-01 — Define a replay format** |
+| Work items completed | **17 / 100** |
+| Next work item | **P03-02 — Record complete command histories** |
 
 ---
 
@@ -250,18 +250,19 @@ The packed artifact, public exports, examples, and declarations agree. Phase 02'
 
 ## Phase 03 — Replay, provenance, and determinism
 
-**Status:** in progress · **Progress:** 0/7 · **Depends on:** Phases 01–02
+**Status:** in progress · **Progress:** 1/7 · **Depends on:** Phases 01–02
 
 **Outcome:** Runs can be reproduced and divergences can be explained from durable inputs.
 
 ### Work items
 
-- [ ] **P03-01 — Define a replay format.** Record initial state, seed, configuration identity, ordered commands, and explicit time-control operations.
+- [x] **P03-01 — Define a replay format.** Record initial state, seed, configuration identity, ordered commands, and explicit time-control operations.
   - **Done when:** A versioned schema distinguishes replay inputs from the bounded event journal and preserves scheduled-action semantics.
-  - **Implementation in review, October 28, 2026:** [PR #41](https://github.com/keepithandy/pulse-engine/pull/41) defines the versioned replay input record, shipped JSON Schema, strict validator, regression fixtures, TypeScript contracts and explicit external-command/scheduled-work policies. The checkbox remains open until CI and merge are complete.
+  - **Merged and verified, October 28, 2026:** [PR #41](https://github.com/keepithandy/pulse-engine/pull/41), commit `7c8a1d2`, delivered the versioned protocol, shipped schema, strict validation, TypeScript contracts and regression fixtures. Initial pause state and unsupported command-kind review findings were fixed; all nine checks passed.
 
 - [ ] **P03-02 — Record complete command histories.** Add an opt-in recorder with sequence numbers, accepted/rejected outcomes, and a policy for dynamic plug-in changes.
   - **Done when:** Captured input order is complete and recording can use a streaming sink without retaining the entire run in memory.
+  - **Implementation in review, October 28, 2026:** [Implementation brief](implementation-briefs/P03-02-command-recording.md) and [recording contract](recording.md) define engine-owned capture, synchronous streaming, outcomes and explicit failure/configuration boundaries. The checkbox remains open until review, CI and merge.
 
 - [ ] **P03-03 — Implement replay execution.** Rebuild a fresh configured engine and execute recorded commands without duplicating internally scheduled work.
   - **Done when:** Original and replayed checkpoints match for ticks, state, PRNG, scheduler, revisions, and event sequencing.

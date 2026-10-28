@@ -78,7 +78,7 @@ function outcome(value, path) {
   }
 }
 
-function command(value, index) {
+export function validateReplayCommand(value, index) {
   const path = `$.commands[${index}]`;
   record(value, path);
   if (typeof value.kind !== "string" || !Object.hasOwn(COMMAND_KEYS, value.kind)) {
@@ -136,7 +136,7 @@ export function validateReplayRecord(input) {
   initialCheckpoint(value.initialSnapshot, value.seed);
   if (typeof value.initialPaused !== "boolean") fail("$.initialPaused", "expected a boolean.");
   if (!Array.isArray(value.commands)) fail("$.commands", "expected an array.");
-  value.commands.forEach(command);
+  value.commands.forEach(validateReplayCommand);
   return freezeData(value);
 }
 
