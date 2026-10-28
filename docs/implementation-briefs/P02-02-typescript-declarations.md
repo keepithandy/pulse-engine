@@ -1,7 +1,6 @@
 # P02-02 — TypeScript declaration baseline
 
-Status: implementation proposed for review; the roadmap item remains unchecked
-until the PR is reviewed and merged. Runtime baseline: `5e260a0`.
+Status: implemented and merged on October 26, 2026 in [PR #34](https://github.com/keepithandy/pulse-engine/pull/34). Runtime baseline: `5e260a0`.
 
 ## Scope
 
@@ -22,9 +21,8 @@ dependency relationships, and saved-state invariants still require runtime valid
 Lifecycle/listener `void` callbacks retain TypeScript's usual async assignability;
 the synchronous runtime contract still applies. See [the consumer guide](../typescript.md).
 
-Type declaration wiring is the minimum package change needed here. Broader metadata
-and export-path policy remain P02-04. The installed fixture checks declarations;
-isolated runtime/CLI consumer coverage remains P02-05. The remaining review findings
+Type declaration wiring is the minimum package change needed here. Broader metadata and export-path policy were delivered in P02-04 (PR #35).
+Isolated runtime/CLI consumer coverage was added in P02-05 (PR #38). The remaining review findings
 about migration atomicity, restored event envelopes, and entity lookup identity are
 separate work and are not fixed by adding declarations.
 
