@@ -262,3 +262,38 @@ export function summarizePulseError(error: unknown): {
   code: string; category: string; message: string;
   cause: { name: string; message: string; code: string | null } | null;
 };
+
+// Phase 03 input-log contract. The replay protocol records host-originated calls,
+// not automatically triggered scheduled actions or bounded event-journal output.
+export const REPLAY_FORMAT: "pulse-engine-replay";
+export const REPLAY_VERSION: 1;
+export type ReplayOutcome =
+  | { status: "accepted"; reason?: never }
+  | { status: "rejected"; reason?: string }
+  | { status: "error"; reason: string };
+export type ReplayCommand<A extends Action = AnyAction> = { sequence: number; outcome?: ReplayOutcome } & (
+  | { kind: "dispatch"; action: A }
+  | { kind: "step" }
+  | { kind: "advance"; count: number }
+  | { kind: "schedule"; action: A; options: ScheduleOptions }
+  | { kind: "cancelSchedule"; id: string }
+  | { kind: "pause" }
+  | { kind: "resume" }
+);
+export interface ReplayRecord<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> {
+  format: typeof REPLAY_FORMAT;
+  version: typeof REPLAY_VERSION;
+  engineVersion: typeof ENGINE_VERSION;
+  configurationId: string;
+  seed: string | number;
+  initialSnapshot: DeepReadonly<Snapshot<S, A, E>>;
+  commands: DeepReadonly<ReplayCommand<A>[]>;
+}
+/** Builds an immutable replay record. The caller supplies the starting checkpoint. */
+export function createReplayRecord<S, A extends Action = AnyAction, E extends EventInput = EventInput>(input: {
+  configurationId: string; seed: string | number;
+  initialSnapshot: DeepReadonly<Snapshot<S, A, E>>;
+  commands?: readonly ReplayCommand<A>[];
+}): DeepReadonly<ReplayRecord<S, A, E>>;
+/** Validates/detaches a replay record; does not execute or record commands. */
+export function validateReplayRecord(input: unknown): DeepReadonly<ReplayRecord>;
