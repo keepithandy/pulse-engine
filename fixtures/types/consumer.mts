@@ -96,7 +96,7 @@ const replayInput: pulse.ReplayCommand<Command> = {
   sequence: 1, kind: "dispatch", action: { type: "add", amount: 2 }, outcome: { status: "accepted" }
 };
 const replay = pulse.createReplayRecord({
-  configurationId: "typed-counter-v1", seed: 0, initialSnapshot: snapshot,
+  configurationId: "typed-counter-v1", seed: 0, initialSnapshot: snapshot, initialPaused: false,
   commands: [replayInput, { sequence: 2, kind: "advance", count: 1 }]
 });
 const replayVersion: 1 = replay.version;

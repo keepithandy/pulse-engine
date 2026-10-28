@@ -287,12 +287,14 @@ export interface ReplayRecord<S = unknown, A extends Action = AnyAction, E exten
   configurationId: string;
   seed: string | number;
   initialSnapshot: DeepReadonly<Snapshot<S, A, E>>;
+  initialPaused: boolean;
   commands: DeepReadonly<ReplayCommand<A>[]>;
 }
 /** Builds an immutable replay record. The caller supplies the starting checkpoint. */
 export function createReplayRecord<S, A extends Action = AnyAction, E extends EventInput = EventInput>(input: {
   configurationId: string; seed: string | number;
   initialSnapshot: DeepReadonly<Snapshot<S, A, E>>;
+  initialPaused: boolean;
   commands?: readonly ReplayCommand<A>[];
 }): DeepReadonly<ReplayRecord<S, A, E>>;
 /** Validates/detaches a replay record; does not execute or record commands. */

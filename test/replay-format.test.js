@@ -28,7 +28,7 @@ test("P03-01 fixture matches a real engine checkpoint and can round-trip without
     const parsed = validateReplayRecord(fixture);
     const assembled = createReplayRecord({
       configurationId: fixture.configurationId, seed: 17,
-      initialSnapshot: engine.snapshot(), commands: fixture.commands
+      initialSnapshot: engine.snapshot(), initialPaused: false, commands: fixture.commands
     });
     assert.deepEqual(parsed, fixture);
     assert.deepEqual(assembled, fixture);
@@ -48,7 +48,7 @@ test("P03-01 fixture matches a real engine checkpoint and can round-trip without
 test("record envelope defaults to an empty command log without capturing event history", () => {
   const engine = engineWithInitialSchedule();
   try {
-    const empty = createReplayRecord({ configurationId: "fixture-v1", seed: 17, initialSnapshot: engine.snapshot() });
+    const empty = createReplayRecord({ configurationId: "fixture-v1", seed: 17, initialSnapshot: engine.snapshot(), initialPaused: false });
     assert.deepEqual(empty.commands, []);
     assert.equal(empty.initialSnapshot.schedules.jobs.length, 1);
     assert.equal(empty.initialSnapshot.events.history.length, 0);
@@ -103,6 +103,41 @@ test("invalid command sequences and unknown operations reject in all cases", () 
   }
 });
 
+test("command kinds must be supported strings and report structured validation errors", () => {
+  for (const kind of [["step"], "constructor", "toString", "__proto__", "unknown"]) {
+    const malformed = copy();
+    malformed.commands = [{ sequence: 1, kind }];
+    assert.throws(() => validateReplayRecord(malformed), error =>
+      error instanceof TypeError && error.code === "PULSE_VALIDATION" &&
+      error.category === "validation" && /\$\.commands\[0\]\.kind/.test(error.message));
+  }
+});
+
+test("initial pause state preserves advance behavior when a checkpoint is replayed", () => {
+  for (const initialPaused of [false, true]) {
+    const original = engineWithInitialSchedule();
+    const replayed = engineWithInitialSchedule();
+    try {
+      if (initialPaused) original.pause();
+      const record = createReplayRecord({
+        configurationId: "fixture-v1", seed: 17, initialSnapshot: original.snapshot(),
+        initialPaused, commands: [{ sequence: 1, kind: "advance", count: 5 }]
+      });
+      original.advance(5);
+      replayed.restore(record.initialSnapshot);
+      if (record.initialPaused) replayed.pause();
+      else replayed.resume();
+      replayed.advance(record.commands[0].count);
+      assert.equal(replayed.getTick(), original.getTick());
+      assert.deepEqual(replayed.getState(), original.getState());
+      assert.equal(replayed.getTick(), initialPaused ? 0 : 5);
+    } finally {
+      original.dispose();
+      replayed.dispose();
+    }
+  }
+});
+
 test("replay rejects malformed or incompatible envelopes and nested checkpoint state", () => {
   for (const [mutate, message] of [
     [record => { record.format = "pulse-event-journal"; }, /format/],
@@ -116,6 +151,8 @@ test("replay rejects malformed or incompatible envelopes and nested checkpoint s
     [record => { record.initialSnapshot.events.sequence = -1; }, /journal/],
     [record => { record.initialSnapshot.schedules.jobs[0].at = -1; }, /Schedule tick/],
     [record => { delete record.initialSnapshot; }, /initialSnapshot/],
+    [record => { delete record.initialPaused; }, /initialPaused/],
+    [record => { record.initialPaused = "false"; }, /initialPaused/],
     [record => { record.unexpected = true; }, /unexpected field/]
   ]) {
     const malformed = copy();
@@ -150,6 +187,8 @@ test("published JSON Schema covers all external commands and the full starting s
   assert.equal(schema.properties.version.const, REPLAY_VERSION);
   assert.equal(schema.additionalProperties, false);
   assert.ok(schema.required.includes("initialSnapshot"));
+  assert.ok(schema.required.includes("initialPaused"));
+  assert.equal(schema.properties.initialPaused.type, "boolean");
   assert.ok(schema.$defs.snapshot.required.includes("schedules"));
   assert.ok(schema.$defs.snapshot.required.includes("randomState"));
   const commandKinds = schema.$defs.command.oneOf.map(shape => shape.properties.kind.const).sort();

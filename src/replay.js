@@ -81,8 +81,10 @@ function outcome(value, path) {
 function command(value, index) {
   const path = `$.commands[${index}]`;
   record(value, path);
+  if (typeof value.kind !== "string" || !Object.hasOwn(COMMAND_KEYS, value.kind)) {
+    fail(`${path}.kind`, "unsupported external command.");
+  }
   const fields = COMMAND_KEYS[value.kind];
-  if (!fields) fail(`${path}.kind`, "unsupported external command.");
   shape(value, path, ["sequence", "kind", ...fields], ["sequence", "kind", ...fields, "outcome"]);
   counter(value.sequence, `${path}.sequence`, 1);
   if (value.sequence !== index + 1) fail(`${path}.sequence`, "commands must have contiguous sequences starting at 1.");
@@ -118,7 +120,7 @@ export function validateReplayRecord(input) {
   catch (cause) {
     throw pulseError(TypeError, "PULSE_VALIDATION", "validation", `Invalid replay data: ${cause.message}`, cause);
   }
-  shape(value, "$", ["format", "version", "engineVersion", "configurationId", "seed", "initialSnapshot", "commands"]);
+  shape(value, "$", ["format", "version", "engineVersion", "configurationId", "seed", "initialSnapshot", "initialPaused", "commands"]);
   if (value.format !== REPLAY_FORMAT) fail("$.format", "invalid replay format.");
   if (value.version !== REPLAY_VERSION) {
     throw pulseError(RangeError, "PULSE_COMPATIBILITY", "compatibility", `Unsupported replay version: ${value.version}.`);
@@ -132,6 +134,7 @@ export function validateReplayRecord(input) {
     fail("$.seed", "expected a finite number or string.");
   }
   initialCheckpoint(value.initialSnapshot, value.seed);
+  if (typeof value.initialPaused !== "boolean") fail("$.initialPaused", "expected a boolean.");
   if (!Array.isArray(value.commands)) fail("$.commands", "expected an array.");
   value.commands.forEach(command);
   return freezeData(value);
@@ -145,7 +148,7 @@ export function createReplayRecord(input) {
     throw pulseError(TypeError, "PULSE_VALIDATION", "validation", `Invalid replay configuration: ${cause.message}`, cause);
   }
   record(value, "$");
-  shape(value, "$", ["configurationId", "seed", "initialSnapshot"], ["configurationId", "seed", "initialSnapshot", "commands"]);
+  shape(value, "$", ["configurationId", "seed", "initialSnapshot", "initialPaused"], ["configurationId", "seed", "initialSnapshot", "initialPaused", "commands"]);
   return validateReplayRecord({
     format: REPLAY_FORMAT,
     version: REPLAY_VERSION,
@@ -153,6 +156,7 @@ export function createReplayRecord(input) {
     configurationId: value.configurationId,
     seed: value.seed,
     initialSnapshot: value.initialSnapshot,
+    initialPaused: value.initialPaused,
     commands: value.commands ?? []
   });
 }

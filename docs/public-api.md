@@ -52,7 +52,7 @@ The linked sections provide usage examples and the returned object's methods.
 | `summarizePulseError` | C | Thrown value, including unknown non-Error values. | JSON-safe `{ code, category, message, cause }`; [structured errors](errors.md). |
 | `REPLAY_FORMAT` | C | None; constant. | `"pulse-engine-replay"`; [replay input protocol](replay-format.md). |
 | `REPLAY_VERSION` | C | None; constant. | `1`; [replay input protocol](replay-format.md). |
-| `createReplayRecord` | A | Host-owned configuration id, original seed, complete initial snapshot and optional ordered commands. | Frozen detached input record; [replay inputs](#replay-input-records). |
+| `createReplayRecord` | A | Host-owned configuration id, original seed, complete initial snapshot, initial pause state and optional ordered commands. | Frozen detached input record; [replay inputs](#replay-input-records). |
 | `validateReplayRecord` | A | JSON-safe replay envelope v1. | Frozen detached validated replay record or throws; [replay inputs](#replay-input-records). |
 | `createEngine` | C | Optional configuration object; JSON-safe initial state, runtime systems/rules, numeric or string seed, and the options below. | Frozen engine interface; [engine API](#engine-api). |
 | `createEngineFromScenario` | C | Scenario v1 data plus an explicit system-factory allowlist and optional validation/engine options. | Engine initialized from scenario data; [scenarios](#scenarios). |
@@ -647,13 +647,13 @@ assert.equal(registry.remove("missing"), null);
 
 ## Replay input records
 
-The v1 replay protocol is independent from saved snapshot envelopes and the bounded event journal. `createReplayRecord({ configurationId, seed, initialSnapshot, commands })` builds a deeply frozen input record and defaults `commands` to `[]`; `validateReplayRecord(input)` accepts an existing detached envelope and checks format/version, configuration id, seed/checkpoint identity, nested checkpoint records and 1-based contiguous external input commands. Neither helper executes, captures or replays a simulation. See the [record reference](replay-format.md), [JSON Schema](replay.schema.json) and [full fixture](../fixtures/replay/counter-v1.json).
+The v1 replay protocol is independent from saved snapshot envelopes and the bounded event journal. `createReplayRecord({ configurationId, seed, initialSnapshot, initialPaused, commands })` builds a deeply frozen input record and defaults `commands` to `[]`; `validateReplayRecord(input)` accepts an existing detached envelope and checks format/version, configuration id, seed/checkpoint identity, pause state, nested checkpoint records and 1-based contiguous external input commands. Neither helper executes, captures or replays a simulation. See the [record reference](replay-format.md), [JSON Schema](replay.schema.json) and [full fixture](../fixtures/replay/counter-v1.json).
 
 ```js
 import { createEngine, createReplayRecord, validateReplayRecord } from "@keepithandy/pulse-engine";
 const engine = createEngine({ seed: "my-seed" });
 const record = createReplayRecord({
-  configurationId: "test-v1", seed: "my-seed", initialSnapshot: engine.snapshot(),
+  configurationId: "test-v1", seed: "my-seed", initialSnapshot: engine.snapshot(), initialPaused: false,
   commands: [{ sequence: 1, kind: "step" }]
 });
 const parsed = validateReplayRecord(JSON.parse(JSON.stringify(record)));

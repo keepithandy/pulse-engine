@@ -14,6 +14,7 @@ See the [JSON Schema](replay.schema.json) for the serialized envelope and the [f
   "configurationId": "my-game/rules-v1",
   "seed": 17,
   "initialSnapshot": { "format": "pulse-engine-snapshot", "...": "full engine.snapshot() record" },
+  "initialPaused": false,
   "commands": [
     { "sequence": 1, "kind": "dispatch", "action": { "type": "world/inspect" } },
     { "sequence": 2, "kind": "step" },
@@ -27,6 +28,7 @@ See the [JSON Schema](replay.schema.json) for the serialized envelope and the [f
 - **`configurationId`:** nonblank, host-owned identity for the *complete runtime configuration* (plug-ins, their versions/order, rules, validators and consumer schemas). The engine does not hash or validate the identity against loaded code. The future executor must enforce host-provided configuration compatibility, never infer it from a snapshot.
 - **`seed`:** caller's original numeric/string seed; for this v1 format its normalized seeded-random identity must equal `initialSnapshot.randomState.seed`. The **checkpoint** owns the PRNG *position* and restores it; restarting from the seed alone would lose earlier random draws.
 - **`initialSnapshot`:** full detached checkpoint from immediately before the first recorded external command, including `state`, `tick`, `revision`, `actionSequence`, branch, random state, pending scheduler jobs and event journal metadata. Preserve the snapshot even if the bounded event journal has evicted older output.
+- **`initialPaused`:** required boolean pause state immediately before the first recorded command. Snapshots do not contain this state; the host must capture it separately, and a future executor must apply it before executing commands.
 - **`commands`:** contiguous safe-integer sequence numbers starting at 1, in order. An empty log is valid. Optional `outcome` describes an observed command's `accepted`, `rejected` or `error` status, with an optional string failure reason (required for `error`). It is metadata, not an instruction to skip execution.
 
 ## External commands
@@ -54,7 +56,7 @@ import { createEngine, createReplayRecord, validateReplayRecord } from "@keepith
 
 const engine = createEngine({ initialState: { count: 0 }, seed: 17 });
 const replay = createReplayRecord({
-  configurationId: "counter-v1", seed: 17, initialSnapshot: engine.snapshot(),
+  configurationId: "counter-v1", seed: 17, initialSnapshot: engine.snapshot(), initialPaused: false,
   commands: [{ sequence: 1, kind: "step" }]
 });
 const parsed = validateReplayRecord(JSON.parse(JSON.stringify(replay)));

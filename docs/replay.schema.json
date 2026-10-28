@@ -11,6 +11,7 @@
     "configurationId",
     "seed",
     "initialSnapshot",
+    "initialPaused",
     "commands"
   ],
   "properties": {
@@ -36,6 +37,9 @@
     },
     "initialSnapshot": {
       "$ref": "#/$defs/snapshot"
+    },
+    "initialPaused": {
+      "type": "boolean"
     },
     "commands": {
       "type": "array",
