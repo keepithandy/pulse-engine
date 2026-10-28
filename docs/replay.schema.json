@@ -1,0 +1,512 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/keepithandy/pulse-engine/blob/main/fixtures/replay/replay.schema.json",
+  "title": "Pulse Engine external-input replay record v1",
+  "description": "P03-01: host-authored input protocol, not event history. Runtime validation also enforces JSON-safe data, exact engine compatibility, contiguous sequences, initial PRNG seed, scheduler invariants and known command shapes.",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "engineVersion",
+    "configurationId",
+    "seed",
+    "initialSnapshot",
+    "commands"
+  ],
+  "properties": {
+    "format": {
+      "const": "pulse-engine-replay"
+    },
+    "version": {
+      "const": 1
+    },
+    "engineVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "configurationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "seed": {
+      "type": [
+        "string",
+        "number"
+      ]
+    },
+    "initialSnapshot": {
+      "$ref": "#/$defs/snapshot"
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/command"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "error"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "accepted"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "reason"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "error"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "reason"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "scheduleOptions": {
+      "type": "object",
+      "required": [
+        "at"
+      ],
+      "properties": {
+        "at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "interval": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          ]
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "snapshot": {
+      "type": "object",
+      "required": [
+        "format",
+        "version",
+        "engineVersion",
+        "branch",
+        "revision",
+        "actionSequence",
+        "tick",
+        "state",
+        "randomState",
+        "events",
+        "schedules"
+      ],
+      "properties": {
+        "format": {
+          "const": "pulse-engine-snapshot"
+        },
+        "version": {
+          "const": 1
+        },
+        "engineVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "branch": {
+          "type": "object",
+          "required": [
+            "id",
+            "parentId"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "parentId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "actionSequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tick": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "state": {
+          "$ref": "#/$defs/jsonValue"
+        },
+        "randomState": {
+          "type": "object",
+          "required": [
+            "algorithm",
+            "seed",
+            "state"
+          ],
+          "properties": {
+            "algorithm": {
+              "const": "mulberry32-v1"
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "state": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          }
+        },
+        "events": {
+          "type": "object",
+          "required": [
+            "format",
+            "version",
+            "sequence",
+            "history"
+          ],
+          "properties": {
+            "format": {
+              "const": "pulse-event-journal"
+            },
+            "version": {
+              "const": 1
+            },
+            "sequence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/jsonValue"
+              }
+            }
+          }
+        },
+        "schedules": {
+          "type": "object",
+          "required": [
+            "version",
+            "sequence",
+            "jobs"
+          ],
+          "properties": {
+            "version": {
+              "const": 1
+            },
+            "sequence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "jobs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/jsonValue"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "command": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "sequence",
+            "kind",
+            "action"
+          ],
+          "properties": {
+            "sequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "kind": {
+              "const": "dispatch"
+            },
+            "action": {
+              "$ref": "#/$defs/action"
+            },
+            "outcome": {
+              "$ref": "#/$defs/outcome"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "sequence",
+            "kind"
+          ],
+          "properties": {
+            "sequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "kind": {
+              "const": "step"
+            },
+            "outcome": {
+              "$ref": "#/$defs/outcome"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "sequence",
+            "kind",
+            "count"
+          ],
+          "properties": {
+            "sequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "kind": {
+              "const": "advance"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "outcome": {
+              "$ref": "#/$defs/outcome"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "sequence",
+            "kind",
+            "action",
+            "options"
+          ],
+          "properties": {
+            "sequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "kind": {
+              "const": "schedule"
+            },
+            "action": {
+              "$ref": "#/$defs/action"
+            },
+            "options": {
+              "$ref": "#/$defs/scheduleOptions"
+            },
+            "outcome": {
+              "$ref": "#/$defs/outcome"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "sequence",
+            "kind",
+            "id"
+          ],
+          "properties": {
+            "sequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "kind": {
+              "const": "cancelSchedule"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "outcome": {
+              "$ref": "#/$defs/outcome"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "sequence",
+            "kind"
+          ],
+          "properties": {
+            "sequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "kind": {
+              "const": "pause"
+            },
+            "outcome": {
+              "$ref": "#/$defs/outcome"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "sequence",
+            "kind"
+          ],
+          "properties": {
+            "sequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "kind": {
+              "const": "resume"
+            },
+            "outcome": {
+              "$ref": "#/$defs/outcome"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}
