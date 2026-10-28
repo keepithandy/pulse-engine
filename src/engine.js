@@ -1,4 +1,5 @@
 import { assertCounter, copyData, freezeData } from "./data.js";
+import { pulseError } from "./errors.js";
 import { createEventJournal } from "./events.js";
 import { synchronousResult } from "./hooks.js";
 import { createPluginRegistry } from "./plugins.js";
@@ -9,9 +10,10 @@ import { deserializeSave, serializeSnapshot } from "./persistence.js";
 import { createSnapshotRecord, forkSnapshotRecord, validateSnapshotRecord } from "./snapshots.js";
 
 function assertAction(action) {
-  copyData(action);
-  if (!action || typeof action !== "object" || Array.isArray(action) || typeof action.type !== "string" || !action.type.trim()) throw new TypeError("Pulse Engine actions require a non-empty type.");
-  if (action.id !== undefined && (typeof action.id !== "string" || !action.id.trim())) throw new TypeError("Action ids must be non-empty strings.");
+  try { copyData(action); }
+  catch (cause) { throw pulseError(TypeError, "PULSE_VALIDATION", "validation", cause.message, cause); }
+  if (!action || typeof action !== "object" || Array.isArray(action) || typeof action.type !== "string" || !action.type.trim()) throw pulseError(TypeError, "PULSE_VALIDATION", "validation", "Pulse Engine actions require a non-empty type.");
+  if (action.id !== undefined && (typeof action.id !== "string" || !action.id.trim())) throw pulseError(TypeError, "PULSE_VALIDATION", "validation", "Action ids must be non-empty strings.");
 }
 
 export function createEngine({ initialState = {}, systems = [], plugins = [], rules = [],
@@ -21,8 +23,8 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
   if (typeof validateState !== "function") throw new TypeError("validateState must be a function.");
   function checkState(value) {
     const result = validateState(freezeData(copyData(value)));
-    if (result && typeof result.then === "function") throw new TypeError("State validation must be synchronous.");
-    if (result === false) throw new TypeError("State validation rejected the state.");
+    if (result && typeof result.then === "function") throw pulseError(TypeError, "PULSE_VALIDATION", "validation", "State validation must be synchronous.");
+    if (result === false) throw pulseError(TypeError, "PULSE_VALIDATION", "validation", "State validation rejected the state.");
   }
   let state = copyData(initialState);
   checkState(state);
@@ -43,11 +45,11 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
   let explanations = [];
 
   function assertMutable() {
-    if (disposed) throw new Error("Engine has been disposed.");
-    if (busy) throw new Error("Reentrant engine mutation is unsupported.");
+    if (disposed) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Engine has been disposed.");
+    if (busy) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Reentrant engine mutation is unsupported.");
   }
   function assertNotDisposed() {
-    if (disposed) throw new Error("Engine has been disposed.");
+    if (disposed) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Engine has been disposed.");
   }
   function getState() { return copyData(state); }
   function getTick() { return tick; }
@@ -105,7 +107,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
       randomState: random.getState(), revision, state: getState(), tick, schedules: scheduler.exportState() });
   }
   function snapshot(options) {
-    if (busy) throw new Error("Checkpoints are unavailable during engine operations. Capture a checkpoint after the operation returns.");
+    if (busy) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Checkpoints are unavailable during engine operations. Capture a checkpoint after the operation returns.");
     return captureSnapshot(options);
   }
   function installSnapshot(input) {
@@ -159,7 +161,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
     const reject = reason => {
       installSnapshot(before);
       remember(action, false, reason, traces);
-      return { accepted: false, action, reason, revision, tick, state: getState() };
+      return { accepted: false, code: "PULSE_REJECTED", category: "rejection", action, reason, revision, tick, state: getState() };
     };
     function applyResponse(response, source) {
       if (response?.accepted === false) return response.reason ?? `Rejected by ${source}`;
