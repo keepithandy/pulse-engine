@@ -1,4 +1,5 @@
 import { copyData } from "./data.js";
+import { pulseError } from "./errors.js";
 
 export const SAVE_FORMAT = "pulse-engine-save";
 export const SAVE_VERSION = 1;
@@ -12,7 +13,7 @@ export function createMigrationRegistry(migrations = []) {
   function migrate(input, targetVersion) {
     let value = copyData(input);
     if (!Number.isSafeInteger(value?.version) || value.version < 0) throw new TypeError("Save version must be a non-negative integer.");
-    if (!Number.isSafeInteger(targetVersion) || targetVersion < value.version) throw new RangeError("Unsupported future save version.");
+    if (!Number.isSafeInteger(targetVersion) || targetVersion < value.version) throw pulseError(RangeError, "PULSE_COMPATIBILITY", "compatibility", "Unsupported future save version.");
     while (value.version < targetVersion) {
       const step = steps.get(value.version);
       if (!step) throw new RangeError(`Missing save migration from version ${value.version}.`);
@@ -31,8 +32,10 @@ export function serializeSnapshot(snapshot) {
 }
 
 export function deserializeSave(input, { migrations = defaultMigrations } = {}) {
-  const value = typeof input === "string" ? JSON.parse(input) : copyData(input);
-  if (!value || value.format !== SAVE_FORMAT) throw new TypeError("Invalid Pulse Engine save format.");
+  let value;
+  try { value = typeof input === "string" ? JSON.parse(input) : copyData(input); }
+  catch (cause) { throw pulseError(cause instanceof SyntaxError ? SyntaxError : TypeError, "PULSE_VALIDATION", "validation", cause.message, cause); }
+  if (!value || value.format !== SAVE_FORMAT) throw pulseError(TypeError, "PULSE_VALIDATION", "validation", "Invalid Pulse Engine save format.");
   const migrated = createMigrationRegistry(migrations).migrate(value, SAVE_VERSION);
   if (!migrated.snapshot) throw new TypeError("Save requires a snapshot.");
   return copyData(migrated.snapshot);

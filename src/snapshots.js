@@ -1,3 +1,5 @@
+import { pulseError } from "./errors.js";
+
 export const ENGINE_VERSION = "0.1.0-alpha.0";
 export const SNAPSHOT_FORMAT = "pulse-engine-snapshot";
 export const SNAPSHOT_VERSION = 1;
@@ -61,15 +63,15 @@ export function validateSnapshotRecord(input) {
   const snapshot = copyData(input);
 
   if (!snapshot || snapshot.format !== SNAPSHOT_FORMAT) {
-    throw new TypeError("Invalid Pulse Engine snapshot format.");
+    throw pulseError(TypeError, "PULSE_VALIDATION", "validation", "Invalid Pulse Engine snapshot format.");
   }
 
   if (snapshot.version !== SNAPSHOT_VERSION) {
-    throw new RangeError(`Unsupported snapshot version: ${snapshot.version}.`);
+    throw pulseError(RangeError, "PULSE_COMPATIBILITY", "compatibility", `Unsupported snapshot version: ${snapshot.version}.`);
   }
 
   if (snapshot.engineVersion !== ENGINE_VERSION) {
-    throw new RangeError(
+    throw pulseError(RangeError, "PULSE_COMPATIBILITY", "compatibility",
       `Snapshot engine version ${snapshot.engineVersion} is incompatible with ${ENGINE_VERSION}.`
     );
   }

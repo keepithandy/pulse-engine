@@ -1,4 +1,5 @@
 import { copyData } from "./data.js";
+import { pulseError } from "./errors.js";
 import { createEngine } from "./engine.js";
 
 export const SCENARIO_VERSION = 1;
@@ -42,7 +43,7 @@ export function validateScenario(input, { validateGameData } = {}) {
 
 export function createEngineFromScenario(input, { systemRegistry = {}, validateGameData, seed, ...options } = {}) {
   const result = validateScenario(input, { validateGameData });
-  if (!result.valid) throw new TypeError(result.errors.join("\n"));
+  if (!result.valid) throw pulseError(TypeError, "PULSE_VALIDATION", "validation", result.errors.join("\n"));
   const scenario = result.value;
   const systems = scenario.systems.map(id => {
     if (!Object.hasOwn(systemRegistry, id) || typeof systemRegistry[id] !== "function") throw new TypeError(`$.systems: unknown system ${id}.`);

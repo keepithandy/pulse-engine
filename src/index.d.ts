@@ -168,7 +168,7 @@ export interface AcceptedDispatch<S, A extends Action, E extends EventInput> {
   events: PublishedEvent<E>[]; listenerErrors: unknown[]; eventListenerErrors: unknown[]; pluginErrors: unknown[];
 }
 export interface RejectedDispatch<S, A extends Action> {
-  accepted: false; action: A & { id: string }; reason: unknown; revision: number; tick: number; state: S;
+  accepted: false; code: "PULSE_REJECTED"; category: "rejection"; action: A & { id: string }; reason: unknown; revision: number; tick: number; state: S;
 }
 export type DispatchResult<S, A extends Action, E extends EventInput> = AcceptedDispatch<S, A, E> | RejectedDispatch<S, A>;
 export type ScheduledResult<S, A extends Action, E extends EventInput> = { scheduleId: string } & (
@@ -256,3 +256,9 @@ export function createEngineFromScenario<A extends Action = AnyAction, E extends
   options?: Omit<EngineOptions<ScenarioState, A, E, I>, "initialState" | "systems"> & ScenarioValidationOptions & { systemRegistry?: SystemRegistry<A, E> }
 ): Readonly<Engine<ScenarioState, A, E, I>>;
 export const exampleSystemRegistry: Readonly<SystemRegistry>;
+
+/** Structured public failure diagnostic; raw internal and plug-in errors may have unknown codes. */
+export function summarizePulseError(error: unknown): {
+  code: string; category: string; message: string;
+  cause: { name: string; message: string; code: string | null } | null;
+};

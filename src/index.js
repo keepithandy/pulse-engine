@@ -15,3 +15,4 @@ export {
   forkSnapshotRecord,
   validateSnapshotRecord
 } from "./snapshots.js";
+export { summarizePulseError } from "./errors.js";
