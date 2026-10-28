@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Roadmap status:** Phases 01–02 are implemented and merged; **16 of 100** work items are complete. The reviewed baseline remains pinned as historical evidence. Phase 03 is next.
+> **Roadmap status:** Phases 01–02 are implemented and merged; **16 of 100** work items are complete. The reviewed baseline remains pinned as historical evidence. Phase 03 has begun with P03-01 in review.
 
 | Document field | Value |
 | --- | --- |
@@ -250,7 +250,7 @@ The packed artifact, public exports, examples, and declarations agree. Phase 02'
 
 ## Phase 03 — Replay, provenance, and determinism
 
-**Status:** not started · **Progress:** 0/7 · **Depends on:** Phases 01–02
+**Status:** in progress · **Progress:** 0/7 · **Depends on:** Phases 01–02
 
 **Outcome:** Runs can be reproduced and divergences can be explained from durable inputs.
 
@@ -258,6 +258,7 @@ The packed artifact, public exports, examples, and declarations agree. Phase 02'
 
 - [ ] **P03-01 — Define a replay format.** Record initial state, seed, configuration identity, ordered commands, and explicit time-control operations.
   - **Done when:** A versioned schema distinguishes replay inputs from the bounded event journal and preserves scheduled-action semantics.
+  - **Implementation in review, October 28, 2026:** [PR #41](https://github.com/keepithandy/pulse-engine/pull/41) defines the versioned replay input record, shipped JSON Schema, strict validator, regression fixtures, TypeScript contracts and explicit external-command/scheduled-work policies. The checkbox remains open until CI and merge are complete.
 
 - [ ] **P03-02 — Record complete command histories.** Add an opt-in recorder with sequence numbers, accepted/rejected outcomes, and a policy for dynamic plug-in changes.
   - **Done when:** Captured input order is complete and recording can use a streaming sink without retaining the entire run in memory.
