@@ -34,8 +34,8 @@ function shape(value, path, required, allowed = required) {
 }
 
 function name(value, path) {
-  if (typeof value !== "string" || !value.trim() || value.trim() !== value) {
-    fail(path, "expected a non-empty canonical string.");
+  if (typeof value !== "string" || !value.trim()) {
+    fail(path, "expected a non-empty string.");
   }
 }
 
@@ -127,6 +127,7 @@ export function validateReplayRecord(input) {
     throw pulseError(RangeError, "PULSE_COMPATIBILITY", "compatibility", `Replay engine version ${value.engineVersion} is incompatible with ${ENGINE_VERSION}.`);
   }
   name(value.configurationId, "$.configurationId");
+  if (value.configurationId.trim() !== value.configurationId) fail("$.configurationId", "must not have surrounding whitespace.");
   if (!(typeof value.seed === "string" || typeof value.seed === "number" && Number.isFinite(value.seed))) {
     fail("$.seed", "expected a finite number or string.");
   }
