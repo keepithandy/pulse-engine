@@ -1,6 +1,6 @@
 # Public API inventory
 
-This inventory covers all **30 named exports** from `@keepithandy/pulse-engine`
+This inventory covers all **31 named exports** from `@keepithandy/pulse-engine`
 at `0.1.0-alpha.0`, plus the methods and hook contracts they expose. It was checked
 against `src/index.js` and its implementations at baseline `ec4c887`.
 See [engine contracts](engine-contracts.md) for the detailed behavioral boundaries.
@@ -54,6 +54,7 @@ The linked sections provide usage examples and the returned object's methods.
 | `REPLAY_VERSION` | C | None; constant. | `1`; [replay input protocol](replay-format.md). |
 | `createReplayRecord` | A | Host-owned configuration id, original seed, complete initial snapshot, initial pause state and optional ordered commands. | Frozen detached input record; [replay inputs](#replay-input-records). |
 | `validateReplayRecord` | A | JSON-safe replay envelope v1. | Frozen detached validated replay record or throws; [replay inputs](#replay-input-records). |
+| `replayCommands` | C | Valid replay record, matching host configuration id and synchronous trusted engine factory; optional checkpoint callback. | Deeply frozen completion or first outcome divergence; [replay execution](replay-execution.md). |
 | `createEngine` | C | Optional configuration object; JSON-safe initial state, runtime systems/rules, numeric or string seed, and the options below. | Frozen engine interface; [engine API](#engine-api). |
 | `createEngineFromScenario` | C | Scenario v1 data plus an explicit system-factory allowlist and optional validation/engine options. | Engine initialized from scenario data; [scenarios](#scenarios). |
 | `validateScenario` | C | Scenario data and optional synchronous `validateGameData` callback. | `{ valid, errors, value }`; invalid data has `value: null`; [scenarios](#scenarios). |

@@ -327,3 +327,36 @@ export interface ReplayRecording<S = unknown, A extends Action = AnyAction, E ex
   /** Available only after a successful stop with retainCommands enabled. */
   getRecord(): DeepReadonly<ReplayRecord<S, A, E>>;
 }
+
+/** P03-03 — A fresh engine owned and disposed by the replay executor. */
+export type ReplayExecutionHost<S, A extends Action, E extends EventInput> = Pick<
+  Engine<S, A, E>, "restore" | "snapshot" | "dispatch" | "step" | "advance" |
+  "schedule" | "cancelSchedule" | "pause" | "resume" | "dispose"
+>;
+export interface ReplayCheckpoint<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> {
+  readonly sequence: number;
+  readonly kind: "initial" | ReplayCommand<A>["kind"];
+  readonly tick: number;
+  readonly outcome: DeepReadonly<ReplayOutcome> | null;
+  readonly snapshot: DeepReadonly<Snapshot<S, A, E>>;
+}
+export interface ReplayDivergence<A extends Action = AnyAction> {
+  readonly sequence: number;
+  readonly kind: ReplayCommand<A>["kind"];
+  readonly tick: number;
+  readonly expected: DeepReadonly<ReplayOutcome> | null;
+  readonly actual: DeepReadonly<ReplayOutcome>;
+}
+export type ReplayExecutionResult<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> =
+  | { readonly status: "completed"; readonly commandCount: number; readonly finalSnapshot: DeepReadonly<Snapshot<S, A, E>> }
+  | { readonly status: "diverged"; readonly commandCount: number; readonly divergence: ReplayDivergence<A> };
+export interface ReplayExecutionOptions<S, A extends Action, E extends EventInput> {
+  expectedConfigurationId: string;
+  createConfiguredEngine(context: Readonly<{ configurationId: string; seed: string | number }>): ReplayExecutionHost<S, A, E>;
+  onCheckpoint?(entry: ReplayCheckpoint<S, A, E>): void;
+}
+/** Executes external inputs only, verifies outcomes and disposes the created engine. */
+export function replayCommands<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput>(
+  record: unknown,
+  options: ReplayExecutionOptions<S, A, E>
+): ReplayExecutionResult<S, A, E>;

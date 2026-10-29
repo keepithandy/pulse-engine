@@ -9,6 +9,7 @@ Selected public engine boundaries attach **`code`** and **`category`** to standa
 | `PULSE_COMPATIBILITY` | `compatibility` | Unsupported snapshot or future save version |
 | `PULSE_LIFECYCLE` | `lifecycle` | Disposed engine, reentrant mutation, or checkpoint while busy |
 | `PULSE_RECORDING` | `recording` | Incomplete recording, sink failure, or mutation forbidden during recording; see [failure boundaries](recording.md#failure-and-mutation-boundaries) |
+| `PULSE_REPLAY` | `replay` | Mismatched host configuration, incompatible restored checkpoint, or replay cleanup failure; see [execution contract](replay-execution.md) |
 | `PULSE_UNKNOWN` | `unknown` | Error without structured metadata or non-Error thrown value in a summary |
 
 ```js

@@ -113,6 +113,31 @@ const invalidReplayAdvance: pulse.ReplayCommand<Command> = { sequence: 3, kind: 
 const invalidReplayOutcome: pulse.ReplayOutcome = { status: "accepted", reason: "failed" };
 void [invalidReplayKind, invalidReplayAction, invalidReplayAdvance, invalidReplayOutcome];
 
+
+// P03-03: the public replay executor owns the temporary engine and narrows its result.
+const execution = pulse.replayCommands(replay, {
+  expectedConfigurationId: "typed-counter-v1",
+  createConfiguredEngine({ seed }) { return pulse.createEngine({ initialState: { count: 0, rolls: [] }, seed }); },
+  onCheckpoint(checkpoint) {
+    const sequence: number = checkpoint.sequence;
+    const tick: number = checkpoint.snapshot.tick;
+    void [sequence, tick];
+    // @ts-expect-error Replay snapshots are deeply readonly.
+    checkpoint.snapshot.tick = 100;
+  }
+});
+if (execution.status === "completed") {
+  const count: number = execution.finalSnapshot.state.count;
+  void count;
+} else {
+  const sequence: number = execution.divergence.sequence;
+  // @ts-expect-error Divergence reports deliberately do not expose full state.
+  execution.finalSnapshot;
+  void sequence;
+}
+// @ts-expect-error An explicit trusted configuration identity is mandatory.
+pulse.replayCommands(replay, { createConfiguredEngine: () => engine });
+
 const recording = engine.startRecording({
   configurationId: "typed-counter-v1",
   sink(entry) {
