@@ -141,7 +141,7 @@ pulse.replayCommands(replay, { createConfiguredEngine: () => engine });
 const checksum: Promise<`sha256-v1:${string}`> = pulse.digestCheckpoint(snapshot);
 const normalizedChecksum: Promise<string> = checksum;
 void normalizedChecksum;
-const pendingTrace: Promise<pulse.CheckpointTrace<State, Command, Event>> = pulse.createCheckpointTrace({
+const pendingTrace: Promise<pulse.CheckpointTrace<State, Command, Event>> = pulse.createCheckpointTrace<State, Command, Event>({
   configurationId: "typed-counter-v1",
   commandCount: 0,
   checkpoints: [{ sequence: 0, kind: "initial", tick: snapshot.tick, outcome: null, snapshot }],
