@@ -1,6 +1,6 @@
 # Replay input format (v1)
 
-**Scope:** Phase 03, work item P03-01. This document specifies the portable, versioned **inputs** needed to reproduce a deterministic run. It is not a replay recorder or replay executor. Those are P03-02 and P03-03.
+**Scope:** Phase 03, work item P03-01. This document specifies the portable, versioned **inputs** needed to reproduce a deterministic run. See [recording](recording.md) for P03-02's capture API. Replay execution is P03-03.
 
 See the [JSON Schema](replay.schema.json) for the serialized envelope and the [fixture](../fixtures/replay/counter-v1.json) for a full example. These two files are separate: the schema is included in the installable package, while the test fixture stays in the checkout.
 
@@ -47,7 +47,7 @@ Each command allows only the listed fields plus `sequence`, `kind` and optional 
 
 **No internal work may be recorded as another external input.** If the host calls `step()` and that tick triggers three scheduled actions, record *one* `step`, not the three scheduled dispatches, `engine/tick`, or emitted events. The same applies to `advance(count)`; the executor must call it once with the recorded count, even if pause or rejection stops it early.
 
-**Dynamic plug-in/rule changes are not replayable in v1.** Do not serialize hook functions or treat a registration as a command. P03-02 must either reject sessions with dynamic runtime changes or close one recording and begin a new one with a fresh configuration identity and checkpoint. This prevents silently replaying a different system graph.
+**Dynamic plug-in/rule changes are not replayable in v1.** Do not serialize hook functions or treat a registration as a command. The P03-02 recorder rejects engine configuration changes during recording. Stop first, change the configuration, then begin a new session with a fresh identity and checkpoint. The host must also keep external callback dependencies stable.
 
 ## Public helpers
 
@@ -79,4 +79,4 @@ engine.dispose();
 
 This is a **pre-alpha v1 input schema**, not a stable external file guarantee. The validator rejects unknown top-level/command fields, unknown operation kinds, unsupported format/version/engine-version values, invalid sequences, unsafe payloads and broken starting checkpoints. The JSON Schema describes the portable shape; JavaScript validation additionally enforces safe integer bounds, accessor-inert JSON-safe data, exact versions, original PRNG seed identity and nested subsystem invariants.
 
-P03-02 will own a recorder, streaming/capture policies and accepted/rejected outcomes. P03-03 will own execution, observer policy and checkpoint comparison. P03-04 will define canonical checkpoint hashes. This PR **does not** modify engine dispatch, tick scheduling, saves, events, randomness or plug-in lifecycles.
+P03-02's [recorder](recording.md) owns capture, streaming policies and accepted/rejected/error outcomes. P03-03 will own execution, observer policy and checkpoint comparison. P03-04 will define canonical checkpoint hashes. The replay format remains separate from save and snapshot schemas.

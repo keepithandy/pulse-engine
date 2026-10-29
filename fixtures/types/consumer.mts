@@ -113,6 +113,56 @@ const invalidReplayAdvance: pulse.ReplayCommand<Command> = { sequence: 3, kind: 
 const invalidReplayOutcome: pulse.ReplayOutcome = { status: "accepted", reason: "failed" };
 void [invalidReplayKind, invalidReplayAction, invalidReplayAdvance, invalidReplayOutcome];
 
+
+// P03-03: the public replay executor owns the temporary engine and narrows its result.
+const execution = pulse.replayCommands(replay, {
+  expectedConfigurationId: "typed-counter-v1",
+  createConfiguredEngine({ seed }) { return pulse.createEngine({ initialState: { count: 0, rolls: [] }, seed }); },
+  onCheckpoint(checkpoint) {
+    const sequence: number = checkpoint.sequence;
+    const tick: number = checkpoint.snapshot.tick;
+    void [sequence, tick];
+    // @ts-expect-error Replay snapshots are deeply readonly.
+    checkpoint.snapshot.tick = 100;
+  }
+});
+if (execution.status === "completed") {
+  const count: number = execution.finalSnapshot.state.count;
+  void count;
+} else {
+  const sequence: number = execution.divergence.sequence;
+  // @ts-expect-error Divergence reports deliberately do not expose full state.
+  execution.finalSnapshot;
+  void sequence;
+}
+// @ts-expect-error An explicit trusted configuration identity is mandatory.
+pulse.replayCommands(replay, { createConfiguredEngine: () => engine });
+
+const recording = engine.startRecording({
+  configurationId: "typed-counter-v1",
+  sink(entry) {
+    if (entry.type === "start") { const count: number = entry.record.initialSnapshot.state.count; void count; }
+    if (entry.type === "command" && entry.command.kind === "dispatch" && entry.command.action.type === "add") {
+      const amount: number = entry.command.action.amount;
+      const outcome: pulse.ReplayOutcome = entry.command.outcome;
+      void [amount, outcome];
+      // @ts-expect-error Stream commands are deeply readonly.
+      entry.command.action.amount = 0;
+    }
+    if (entry.type === "end") { const count: number = entry.commandCount; void count; }
+  }
+});
+const recordingStatus: pulse.ReplayRecordingStatus = recording.getStatus();
+recording.stop();
+const recordedCount: number = recording.getRecord().initialSnapshot.state.count;
+void [recordingStatus, recordedCount];
+// @ts-expect-error A recording requires a configuration identity.
+engine.startRecording({});
+// @ts-expect-error Streaming sinks must be synchronous.
+engine.startRecording({ configurationId: "v1", sink: async () => {} });
+// @ts-expect-error Retention is a boolean option.
+engine.startRecording({ configurationId: "v1", retainCommands: "no" });
+
 engine.dispose();
 
 // Every expected error must remain an error; tsc rejects unused directives.

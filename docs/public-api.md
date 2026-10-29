@@ -169,6 +169,8 @@ errors are collected without undoing the committed action.
 | `advance(count = 1)` | Nonnegative safe integer count. | Array of step results; stops on tick rejection or pause. |
 | `pause()` | None. | `undefined`; prevents `advance` progress. |
 | `resume()` | None. | `undefined`; allows `advance` progress. |
+| **Root:** `replayCommands(record, options)` | Host-approved fresh engine factory; configuration identity; optional checkpoint callback. | Deep-frozen completion or first outcome divergence; [execution contract](replay-execution.md). |
+| `startRecording(options)` | `{ configurationId, seed?, retainCommands?, sink? }`. | Handle with `getStatus()`, `stop()` and `getRecord()`; [recording contract](recording.md). |
 | `inspect()` | None. | Frozen diagnostic view after redaction, or `null` when diagnostics are disabled. |
 | `getExplanation(actionId)` | Action id. | Detached latest retained `{ actionId, tick, revision, accepted, reason, traces }`, or `null`. |
 | `dispose()` | None; one call per engine. | Array of cleanup errors after all reverse-order cleanup attempts and subscription removal. |
