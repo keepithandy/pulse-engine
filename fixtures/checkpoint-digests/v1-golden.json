@@ -1,0 +1,60 @@
+{
+  "description": "P03-04 canonical SHA-256 v1 fixture: sorting, numeric keys, nested data, Unicode, scalar edge cases",
+  "digest": "sha256-v1:99d9717525ff774ceb0ed9dc2d83ce37ceb63abf32c0ecf12db70a92106eca20",
+  "snapshot": {
+    "format": "pulse-engine-snapshot",
+    "version": 1,
+    "engineVersion": "0.1.0-alpha.0",
+    "label": null,
+    "branch": {
+      "id": "main",
+      "parentId": null
+    },
+    "revision": 0,
+    "actionSequence": 0,
+    "tick": 0,
+    "state": {
+      "unicode": {
+        "雪": "雪",
+        "é": "café",
+        "emoji": "💡",
+        "line": "line\nbreak"
+      },
+      "numericKeys": {
+        "2": "two",
+        "10": "ten",
+        "01": "leading"
+      },
+      "arr": [
+        {
+          "z": 1,
+          "a": 2
+        },
+        [],
+        {
+          "x": -2.5,
+          "y": 0.125
+        }
+      ],
+      "empty": {},
+      "min": -42,
+      "max": 9007199254740991
+    },
+    "randomState": {
+      "algorithm": "mulberry32-v1",
+      "seed": 17,
+      "state": 17
+    },
+    "schedules": {
+      "version": 1,
+      "sequence": 0,
+      "jobs": []
+    },
+    "events": {
+      "format": "pulse-event-journal",
+      "version": 1,
+      "sequence": 0,
+      "history": []
+    }
+  }
+}

@@ -17,3 +17,7 @@ export {
 } from "./snapshots.js";
 export { summarizePulseError } from "./errors.js";
 export { REPLAY_FORMAT, REPLAY_VERSION, createReplayRecord, validateReplayRecord } from "./replay.js";
+
+export { replayCommands } from "./replay-execution.js";
+
+export { digestCheckpoint } from "./checkpoint-digest.js";
