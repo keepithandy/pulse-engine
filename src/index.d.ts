@@ -360,3 +360,8 @@ export function replayCommands<S = unknown, A extends Action = AnyAction, E exte
   record: unknown,
   options: ReplayExecutionOptions<S, A, E>
 ): ReplayExecutionResult<S, A, E>;
+
+/** P03-04: asynchronous SHA-256 checksum for a portable, validated checkpoint.
+ * Excludes human label, covers simulation identity; not a signature.
+ */
+export function digestCheckpoint(snapshot: unknown): Promise<`sha256-v1:${string}`>;

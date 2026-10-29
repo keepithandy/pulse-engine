@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Roadmap status:** Phases 01–02 and P03-01 are implemented and merged; **18 of 100** work items are complete. The reviewed baseline remains pinned as historical evidence. P03-02 command recording is in review.
+> **Roadmap status:** Phases 01–02 and P03-01 are implemented and merged; **19 of 100** work items are complete. The reviewed baseline remains pinned as historical evidence. P03-03 replay execution merged; P03-04 checkpoint digests are in review.
 
 | Document field | Value |
 | --- | --- |
@@ -22,8 +22,8 @@
 | Reviewed baseline | [`31a8289`](https://github.com/keepithandy/pulse-engine/commit/31a8289875b78fd7bc8363d23e86b9419f0980fc) |
 | Package | `@keepithandy/pulse-engine` |
 | Baseline version | `0.1.0-alpha.0` |
-| Work items completed | **18 / 100** |
-| Next work item | **P03-03 — Implement replay execution** |
+| Work items completed | **19 / 100** |
+| Next work item | **P03-04 — Add canonical checkpoint digests** |
 
 ---
 
@@ -250,7 +250,7 @@ The packed artifact, public exports, examples, and declarations agree. Phase 02'
 
 ## Phase 03 — Replay, provenance, and determinism
 
-**Status:** in progress · **Progress:** 2/7 · **Depends on:** Phases 01–02
+**Status:** in progress · **Progress:** 3/7 · **Depends on:** Phases 01–02
 
 **Outcome:** Runs can be reproduced and divergences can be explained from durable inputs.
 
@@ -264,12 +264,13 @@ The packed artifact, public exports, examples, and declarations agree. Phase 02'
   - **Done when:** Captured input order is complete and recording can use a streaming sink without retaining the entire run in memory.
   - **Merged and verified, October 29, 2026:** [PR #42](https://github.com/keepithandy/pulse-engine/pull/42) merged at `a372675`, adding engine-owned command capture, synchronous streaming, outcomes and explicit failure/configuration boundaries. All nine PR checks passed.
 
-- [ ] **P03-03 — Implement replay execution.** Rebuild a fresh configured engine and execute recorded commands without duplicating internally scheduled work.
+- [x] **P03-03 — Implement replay execution.** Rebuild a fresh configured engine and execute recorded commands without duplicating internally scheduled work.
   - **Done when:** Original and replayed checkpoints match for ticks, state, PRNG, scheduler, revisions, and event sequencing.
-  - **Implementation in review, October 29, 2026:** [PR #43](https://github.com/keepithandy/pulse-engine/pull/43) implements external-command replay execution with outcome verification, checkpoint hooks and disposable host factories. Status remains open pending green checks and merge.
+  - **Merged and verified, October 29, 2026:** [PR #43](https://github.com/keepithandy/pulse-engine/pull/43) merged at `cab0ad7`, delivering external-command replay, outcome verification, checkpoint hooks and disposable host factories. All nine CI checks passed.
 
 - [ ] **P03-04 — Add canonical checkpoint digests.** Specify deterministic serialization and digest inputs after the Phase 01 data policy is fixed.
   - **Done when:** Equivalent supported data yields identical digests across the supported runtime matrix; ordering and numeric edge cases have fixtures.
+  - **Implementation in review, October 29, 2026:** [PR #44](https://github.com/keepithandy/pulse-engine/pull/44) defines cross-runtime SHA-256 v1 canonicalization, a golden fixture, validation, public TypeScript contracts and browser/Node consumers. Completion remains pending merge.
 
 - [ ] **P03-05 — Report divergence precisely.** Compare checkpoints and report the earliest differing command, tick, state path, and configuration identity.
   - **Done when:** A deliberately corrupted replay produces a useful first-divergence report without dumping sensitive full state by default.

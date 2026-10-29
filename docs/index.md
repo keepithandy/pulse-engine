@@ -10,6 +10,7 @@ Start here to use the pre-alpha simulation engine without reading its internals.
 | Handle failure categories and machine-readable codes | [Structured errors](errors.md) |
 | Specify deterministic replay input records | [Replay format](replay-format.md) |
 | Reproduce an external-command history | [Replay execution](replay-execution.md) |
+| Compare portable checkpoint fingerprints | [Canonical checkpoint digests](checkpoint-digests.md) |
 | Capture complete histories or stream recordings | [Recording](recording.md) |
 | Resolve common runtime, CLI and save problems | [Troubleshooting](troubleshooting.md) |
 | Understand versioning and upgrades | [Compatibility](compatibility.md) |

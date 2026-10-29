@@ -138,6 +138,9 @@ if (execution.status === "completed") {
 // @ts-expect-error An explicit trusted configuration identity is mandatory.
 pulse.replayCommands(replay, { createConfiguredEngine: () => engine });
 
+const checksum: Promise<`sha256-v1:${string}`> = pulse.digestCheckpoint(snapshot);
+const normalizedChecksum: Promise<string> = checksum;
+void normalizedChecksum;
 const recording = engine.startRecording({
   configurationId: "typed-counter-v1",
   sink(entry) {
