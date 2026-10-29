@@ -24,7 +24,7 @@ try {
   await page.waitForFunction(() => window.pulseResult !== undefined);
   const result = await page.evaluate(() => window.pulseResult);
   if (!result.ok || errors.length) throw new Error(JSON.stringify({ result, errors }));
-  console.log(`${name}: native ES module import, dispatch, rules, scheduling, restore, diagnostics, and recording passed.`);
+  console.log(`${name}: native ES module import, dispatch, rules, scheduling, restore, diagnostics, recording and replay execution passed.`);
 } finally {
   await browser?.close();
   await new Promise(done => server.close(done));
