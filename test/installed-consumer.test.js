@@ -26,7 +26,7 @@ test("packed package runs from an isolated JavaScript/CLI consumer without dev d
     assert.equal(installedManifest.name, "@keepithandy/pulse-engine");
     assert.deepEqual(Object.keys(installedManifest.dependencies ?? {}), []);
 
-    const script = `import { createEngine, digestCheckpoint, SAVE_VERSION } from "@keepithandy/pulse-engine";
+    const script = `import { createEngine, digestCheckpoint, createCheckpointTrace, compareCheckpointTraces, SAVE_VERSION } from "@keepithandy/pulse-engine";
 const engine = createEngine({ initialState: { count: 1 }, systems: [{
   id: "count", onAction({ action, state }) {
     if (action.type === "add") return { state: { count: state.count + 1 } };
@@ -38,14 +38,18 @@ recording.stop();
 if (recording.getRecord().commands[0].outcome.status !== "accepted") throw new Error("Installed recorder failed.");
 const digest = await digestCheckpoint(engine.snapshot());
 const digestValid = /^sha256-v1:[0-9a-f]{64}$/.test(digest);
+const cp = engine.snapshot();
+const traceInput = [{ sequence: 0, kind: "initial", tick: cp.tick, outcome: null, snapshot: cp }];
+const trace = await createCheckpointTrace({ configurationId: "installed-counter/v1", commandCount: 0, checkpoints: traceInput });
+const traceValid = compareCheckpointTraces(trace, trace).status === "no-divergence";
 let privateExportBlocked = false;
 try { await import("@keepithandy/pulse-engine/src/engine.js"); }
 catch (error) { privateExportBlocked = error.code === "ERR_PACKAGE_PATH_NOT_EXPORTED"; }
-console.log(JSON.stringify({ accepted: outcome.accepted, count: engine.getState().count, saveVersion: SAVE_VERSION, privateExportBlocked, digestValid }));
+console.log(JSON.stringify({ accepted: outcome.accepted, count: engine.getState().count, saveVersion: SAVE_VERSION, privateExportBlocked, digestValid, traceValid }));
 engine.dispose();`;
     const imported = exec(["--input-type=module", "--eval", script], consumer);
     assert.equal(imported.status, 0, imported.stderr);
-    assert.deepEqual(JSON.parse(imported.stdout), { accepted: true, count: 2, saveVersion: 1, privateExportBlocked: true, digestValid: true });
+    assert.deepEqual(JSON.parse(imported.stdout), { accepted: true, count: 2, saveVersion: 1, privateExportBlocked: true, digestValid: true, traceValid: true });
 
     const installedExample = exec(["node_modules/@keepithandy/pulse-engine/examples/dispatch.mjs"], consumer);
     assert.equal(installedExample.status, 0, installedExample.stderr);

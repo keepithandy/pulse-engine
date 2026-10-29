@@ -365,3 +365,56 @@ export function replayCommands<S = unknown, A extends Action = AnyAction, E exte
  * Excludes human label, covers simulation identity; not a signature.
  */
 export function digestCheckpoint(snapshot: unknown): Promise<`sha256-v1:${string}`>;
+
+/** P03-05: host-owned checkpoint sidecars; independent of the v1 replay format. */
+export const CHECKPOINT_TRACE_FORMAT: "pulse-checkpoint-trace";
+export const CHECKPOINT_TRACE_VERSION: 1;
+export interface CheckpointTraceEntry<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> {
+  readonly sequence: number;
+  readonly kind: "initial" | ReplayCommand<A>["kind"];
+  readonly tick: number;
+  readonly outcome: DeepReadonly<ReplayOutcome> | null;
+  readonly digest: `sha256-v1:${string}`;
+  readonly snapshot?: DeepReadonly<Snapshot<S, A, E>>;
+}
+export interface CheckpointTrace<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> {
+  readonly format: typeof CHECKPOINT_TRACE_FORMAT;
+  readonly version: typeof CHECKPOINT_TRACE_VERSION;
+  readonly configurationId: string;
+  readonly commandCount: number;
+  readonly checkpoints: readonly CheckpointTraceEntry<S, A, E>[];
+}
+export interface CreateCheckpointTraceOptions<S, A extends Action, E extends EventInput> {
+  configurationId: string;
+  commandCount: number;
+  checkpoints: readonly ReplayCheckpoint<S, A, E>[];
+  includeSnapshots?: boolean;
+}
+export function createCheckpointTrace<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput>(
+  options: CreateCheckpointTraceOptions<S, A, E>
+): Promise<DeepReadonly<CheckpointTrace<S, A, E>>>;
+export interface TraceCompareOptions {
+  /** Requires both traces to contain snapshots; raw values are capped at 256 chars. */
+  includeValues?: boolean;
+  maximumDepth?: number;
+  maximumNodes?: number;
+}
+export type TraceComparison =
+  | { readonly status: "no-divergence"; readonly configurationId: string; readonly commandCount: number }
+  | { readonly status: "different-recordings"; readonly category: "config" | "commands"; readonly reason: string; readonly sequence?: number }
+  | { readonly status: "insufficient-trace"; readonly reason: string; readonly lastMatchedSequence: number | null }
+  | {
+      readonly status: "diverged";
+      readonly location: "initial-checkpoint" | "command";
+      readonly configurationId: string;
+      readonly firstPossibleSequence: number;
+      readonly firstObservedSequence: number;
+      readonly precision: "exact" | "interval";
+      readonly kind: "initial" | ReplayCommand["kind"];
+      readonly tick: Readonly<{ reference: number; candidate: number }>;
+      readonly category: "outcome" | "state" | "scheduler" | "random" | "events" | "metadata" | "checkpoint";
+      readonly path: string | null;
+      readonly traversalLimited: boolean;
+      readonly values?: DeepReadonly<{ reference: JsonValue; candidate: JsonValue }>;
+    };
+export function compareCheckpointTraces(reference: unknown, candidate: unknown, options?: TraceCompareOptions): TraceComparison;

@@ -21,3 +21,4 @@ export { REPLAY_FORMAT, REPLAY_VERSION, createReplayRecord, validateReplayRecord
 export { replayCommands } from "./replay-execution.js";
 
 export { digestCheckpoint } from "./checkpoint-digest.js";
+export { CHECKPOINT_TRACE_FORMAT, CHECKPOINT_TRACE_VERSION, createCheckpointTrace, compareCheckpointTraces } from "./checkpoint-traces.js";

@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **Roadmap status:** Phases 01–02 and P03-01 are implemented and merged; **19 of 100** work items are complete. The reviewed baseline remains pinned as historical evidence. P03-03 replay execution merged; P03-04 checkpoint digests are in review.
+> **Roadmap status:** Phases 01–02 and P03-01 are implemented and merged; **20 of 100** work items are complete. The reviewed baseline remains pinned as historical evidence. P03-04 checkpoint digests merged; P03-05 divergence diagnostics in review.
 
 | Document field | Value |
 | --- | --- |
@@ -22,8 +22,8 @@
 | Reviewed baseline | [`31a8289`](https://github.com/keepithandy/pulse-engine/commit/31a8289875b78fd7bc8363d23e86b9419f0980fc) |
 | Package | `@keepithandy/pulse-engine` |
 | Baseline version | `0.1.0-alpha.0` |
-| Work items completed | **19 / 100** |
-| Next work item | **P03-04 — Add canonical checkpoint digests** |
+| Work items completed | **20 / 100** |
+| Next work item | **P03-05 — Report divergence precisely** |
 
 ---
 
@@ -250,7 +250,7 @@ The packed artifact, public exports, examples, and declarations agree. Phase 02'
 
 ## Phase 03 — Replay, provenance, and determinism
 
-**Status:** in progress · **Progress:** 3/7 · **Depends on:** Phases 01–02
+**Status:** in progress · **Progress:** 4/7 · **Depends on:** Phases 01–02
 
 **Outcome:** Runs can be reproduced and divergences can be explained from durable inputs.
 
@@ -268,12 +268,13 @@ The packed artifact, public exports, examples, and declarations agree. Phase 02'
   - **Done when:** Original and replayed checkpoints match for ticks, state, PRNG, scheduler, revisions, and event sequencing.
   - **Merged and verified, October 29, 2026:** [PR #43](https://github.com/keepithandy/pulse-engine/pull/43) merged at `cab0ad7`, delivering external-command replay, outcome verification, checkpoint hooks and disposable host factories. All nine CI checks passed.
 
-- [ ] **P03-04 — Add canonical checkpoint digests.** Specify deterministic serialization and digest inputs after the Phase 01 data policy is fixed.
+- [x] **P03-04 — Add canonical checkpoint digests.** Specify deterministic serialization and digest inputs after the Phase 01 data policy is fixed.
   - **Done when:** Equivalent supported data yields identical digests across the supported runtime matrix; ordering and numeric edge cases have fixtures.
-  - **Implementation in review, October 29, 2026:** [PR #44](https://github.com/keepithandy/pulse-engine/pull/44) defines cross-runtime SHA-256 v1 canonicalization, a golden fixture, validation, public TypeScript contracts and browser/Node consumers. Completion remains pending merge.
+  - **Merged and verified, October 29, 2026:** [PR #44](https://github.com/keepithandy/pulse-engine/pull/44) merged at `1b08767`, adding cross-runtime SHA-256 v1 canonicalization, a golden fixture, validation and contracts. All nine CI checks passed.
 
 - [ ] **P03-05 — Report divergence precisely.** Compare checkpoints and report the earliest differing command, tick, state path, and configuration identity.
   - **Done when:** A deliberately corrupted replay produces a useful first-divergence report without dumping sensitive full state by default.
+  - **Implementation in review, October 29, 2026:** [PR #45](https://github.com/keepithandy/pulse-engine/pull/45) implements versioned checkpoint traces, first-observed redacted diffs, outcome/config mismatches, honest sparse-trace uncertainty and bounded structural traversal. Completion pending CI and merge.
 
 - [ ] **P03-06 — Add named random streams.** Offer deterministic stream derivation for independent systems while keeping existing random sequences compatible.
   - **Done when:** Adding an unrelated named stream does not change existing stream output; stream state participates in rollback and saves.

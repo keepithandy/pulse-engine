@@ -141,6 +141,28 @@ pulse.replayCommands(replay, { createConfiguredEngine: () => engine });
 const checksum: Promise<`sha256-v1:${string}`> = pulse.digestCheckpoint(snapshot);
 const normalizedChecksum: Promise<string> = checksum;
 void normalizedChecksum;
+const pendingTrace = pulse.createCheckpointTrace({
+  configurationId: "typed-counter-v1",
+  commandCount: 0,
+  checkpoints: [{ sequence: 0, kind: "initial", tick: snapshot.tick, outcome: null, snapshot }],
+  includeSnapshots: true
+});
+void pendingTrace.then(trace => {
+  const configurationId: string = trace.configurationId;
+  const digest: `sha256-v1:${string}` | undefined = trace.checkpoints[0]?.digest;
+  void [configurationId, digest];
+});
+const sampleTrace: pulse.TraceComparison = pulse.compareCheckpointTraces({}, {}, { maximumDepth: 4 });
+if (sampleTrace.status === "diverged") {
+  const path: string | null = sampleTrace.path;
+  const category: string = sampleTrace.category;
+  void [path, category];
+} else {
+  // @ts-expect-error Only divergent reports contain a JSON pointer.
+  sampleTrace.path;
+}
+// @ts-expect-error Trace maximumNodes requires an integer.
+pulse.compareCheckpointTraces({}, {}, { maximumNodes: "unlimited" });
 const recording = engine.startRecording({
   configurationId: "typed-counter-v1",
   sink(entry) {

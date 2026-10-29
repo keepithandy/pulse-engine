@@ -1,6 +1,6 @@
 # Public API inventory
 
-This inventory covers all **32 named exports** from `@keepithandy/pulse-engine`
+This inventory covers all **36 named exports** from `@keepithandy/pulse-engine`
 at `0.1.0-alpha.0`, plus the methods and hook contracts they expose. It was checked
 against `src/index.js` and its implementations at baseline `ec4c887`.
 See [engine contracts](engine-contracts.md) for the detailed behavioral boundaries.
@@ -56,6 +56,9 @@ The linked sections provide usage examples and the returned object's methods.
 | `validateReplayRecord` | A | JSON-safe replay envelope v1. | Frozen detached validated replay record or throws; [replay inputs](#replay-input-records). |
 | `replayCommands` | C | Valid replay record, matching host configuration id and synchronous trusted engine factory; optional checkpoint callback. | Deeply frozen completion or first outcome divergence; [replay execution](replay-execution.md). |
 | `digestCheckpoint` | C | Compatible JSON-safe snapshot with semantically valid PRNG, event journal and schedules. | `Promise<sha256-v1:…>` stable across runtimes; [digest contract](checkpoint-digests.md). |
+| `CHECKPOINT_TRACE_FORMAT`, `CHECKPOINT_TRACE_VERSION` | C | None; versioned trace identifiers. | `"pulse-checkpoint-trace"`, `1`; [trace contract](divergence-diagnostics.md). |
+| `createCheckpointTrace` | C | Host configuration id, command count, replay checkpoint observations, optional snapshot retention. | `Promise<CheckpointTrace>` with SHA-256 sidecars; [trace contract](divergence-diagnostics.md). |
+| `compareCheckpointTraces` | C | Two host-owned trace sidecars; bounded privacy options. | Redacted first-observed mismatch or explicit insufficient-evidence result; [trace contract](divergence-diagnostics.md). |
 | `createEngine` | C | Optional configuration object; JSON-safe initial state, runtime systems/rules, numeric or string seed, and the options below. | Frozen engine interface; [engine API](#engine-api). |
 | `createEngineFromScenario` | C | Scenario v1 data plus an explicit system-factory allowlist and optional validation/engine options. | Engine initialized from scenario data; [scenarios](#scenarios). |
 | `validateScenario` | C | Scenario data and optional synchronous `validateGameData` callback. | `{ valid, errors, value }`; invalid data has `value: null`; [scenarios](#scenarios). |
