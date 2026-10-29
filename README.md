@@ -299,6 +299,7 @@ The [development roadmap](docs/PULSE-ENGINE-DEVELOPMENT-ROADMAP.md) organizes th
 
 - [Public API inventory](docs/public-api.md) — every root export, compatibility classes, inputs, results, and examples
 - [Replay format](docs/replay-format.md) — versioned, validated command inputs and scheduling semantics for Phase 03
+- [Command recording](docs/recording.md) — opt-in capture, outcomes and synchronous streaming
 - [Engine contracts](docs/engine-contracts.md) — API behavior, lifecycle, snapshots, saves, scheduling, diagnostics, and scenarios
 - [Example scenarios](scenarios/) — data-driven inputs for the headless runner
 - [Source](src/) — engine implementation

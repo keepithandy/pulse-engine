@@ -214,6 +214,7 @@ export interface Engine<S, A extends Action = AnyAction, E extends EventInput = 
   advance(count?: number): StepResult<S, A, E>[];
   pause(): void;
   resume(): void;
+  startRecording(options: ReplayRecordingOptions<S, A, ObservedEvent<E>>): Readonly<ReplayRecording<S, A, ObservedEvent<E>>>;
   inspect(): DeepReadonly<I> | null;
   getExplanation(actionId: string): Explanation | null;
   dispose(): unknown[];
@@ -299,3 +300,30 @@ export function createReplayRecord<S, A extends Action = AnyAction, E extends Ev
 }): DeepReadonly<ReplayRecord<S, A, E>>;
 /** Validates/detaches a replay record; does not execute or record commands. */
 export function validateReplayRecord(input: unknown): DeepReadonly<ReplayRecord>;
+
+export type RecordedReplayCommand<A extends Action = AnyAction> = ReplayCommand<A> & { outcome: ReplayOutcome };
+export type ReplayStreamEntry<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> =
+  | { readonly type: "start"; readonly record: DeepReadonly<ReplayRecord<S, A, E>> }
+  | { readonly type: "command"; readonly command: DeepReadonly<RecordedReplayCommand<A>> }
+  | { readonly type: "end"; readonly commandCount: number };
+export interface ReplayRecordingOptions<S, A extends Action, E extends EventInput> {
+  configurationId: string;
+  /** Defaults to the engine's construction seed; override after restoring a different seed. */
+  seed?: string | number;
+  retainCommands?: boolean;
+  /** Must complete synchronously. Async sinks are rejected at runtime and by this signature. */
+  sink?: (entry: ReplayStreamEntry<S, A, E>) => undefined;
+}
+export interface ReplayRecordingStatus {
+  state: "recording" | "stopped" | "failed";
+  commandCount: number;
+  retainedCommandCount: number;
+  reason: string | null;
+}
+export interface ReplayRecording<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> {
+  getStatus(): Readonly<ReplayRecordingStatus>;
+  /** Finalizes the stream and releases the engine; idempotent. Can throw on sink failure. */
+  stop(): Readonly<ReplayRecordingStatus>;
+  /** Available only after a successful stop with retainCommands enabled. */
+  getRecord(): DeepReadonly<ReplayRecord<S, A, E>>;
+}

@@ -32,7 +32,10 @@ const engine = createEngine({ initialState: { count: 1 }, systems: [{
     if (action.type === "add") return { state: { count: state.count + 1 } };
   }
 }] });
+const recording = engine.startRecording({ configurationId: "installed-counter/v1" });
 const outcome = engine.dispatch({ type: "add" });
+recording.stop();
+if (recording.getRecord().commands[0].outcome.status !== "accepted") throw new Error("Installed recorder failed.");
 let privateExportBlocked = false;
 try { await import("@keepithandy/pulse-engine/src/engine.js"); }
 catch (error) { privateExportBlocked = error.code === "ERR_PACKAGE_PATH_NOT_EXPORTED"; }
