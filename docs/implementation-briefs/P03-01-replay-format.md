@@ -1,6 +1,6 @@
 # P03-01 — Versioned replay input contract
 
-**Status:** implementation for PR review (October 28, 2026).
+**Status:** merged via [PR #41](https://github.com/keepithandy/pulse-engine/pull/41) at `7c8a1d2` (October 28, 2026), with all nine checks passing.
 
 ## Problem and goal
 
@@ -9,7 +9,7 @@ The event journal records bounded outputs, not complete external input history. 
 ## Contract decisions
 
 1. Use `pulse-engine-replay` version 1, with explicit `engineVersion` and host-supplied `configurationId`.
-2. Capture the **complete initial snapshot** before the first recorded command, not merely initial game state. Its random, scheduler and event state must pass validation before accepting a replay record.
+2. Capture the **complete initial snapshot** and explicit `initialPaused` flag before the first recorded command, not merely initial game state. Its random, scheduler and event state must pass validation before accepting a replay record.
 3. Preserve original seed and verify it normalizes to the checkpoint PRNG seed; the checkpoint state owns the current PRNG position.
 4. Define command kinds for dispatch, step, advance, schedule, cancelSchedule, pause and resume; use contiguous 1-based sequence.
 5. Record only **external inputs**. Internal scheduled executions and emitted events are never duplicated as commands.

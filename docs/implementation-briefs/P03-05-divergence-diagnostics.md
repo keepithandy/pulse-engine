@@ -1,14 +1,14 @@
 # P03-05 — First-divergence diagnostics
 
-**Status:** proposed, implementation not started  
-**Depends on:** P03-03 replay execution + P03-04 canonical checkpoint digests.  
+**Status:** implemented on PR #45; CI verification pending  
+**Depends on:** P03-03 replay execution + P03-04 canonical checkpoint digests (both merged).  
 **Goal:** identify the earliest *observed* mismatch between an authoritative run and a replay without exposing entire state by default.
 
 ## Important limitation
 
 A P03-01 replay record holds inputs/outcomes, **not a complete baseline checkpoint after each command**. A final digest alone cannot prove which earlier command first diverged. This feature therefore needs reference and candidate **checkpoint traces** (or full deterministic re-execution of both), not just the replay input plus a final digest.
 
-## Proposed interface
+## Implemented interface
 
 ```ts
 compareCheckpointTraces(reference, candidate, {
@@ -18,7 +18,7 @@ compareCheckpointTraces(reference, candidate, {
 }): DivergenceReport
 ```
 
-Traces are host-owned immutable sidecars keyed by replay `sequence`, `kind`, `tick`, `configurationId`, `digest` and (optional) detached checkpoint. Version their format independently of the P03-01 replay envelope. A trace can be constructed by P03-03's checkpoint callback; do not expand the v1 record's allowed keys silently.
+Traces are host-owned immutable sidecars created asynchronously by `createCheckpointTrace` using the existing SHA-256 digest API, keyed by replay `sequence`, `kind`, `tick`, `configurationId`, `digest` and (optional) detached checkpoint. Version their format independently of the P03-01 replay envelope. A trace can be constructed by P03-03's checkpoint callback; do not expand the v1 record's allowed keys silently.
 
 ## Reporting algorithm
 
@@ -40,3 +40,10 @@ Traces are host-owned immutable sidecars keyed by replay `sequence`, `kind`, `ti
 ## Scope boundary / merge gate
 
 No logs to stdout, UI inspector, interactive diff viewer, serialization of executable hooks or changes to existing replay/save schema. Keep this PR draft until P03-03 and P03-04 are ready, implementation passes all gates, and privacy behavior is reviewed.
+
+## Implementation evidence
+
+- New `src/checkpoint-traces.js` validates strict, versioned sidecars and compares the first paired observed outcome, tick or SHA-256 digest difference.
+- `test/checkpoint-traces.test.js` verifies real replay callbacks and state, scheduler, random, event, outcome and initial-checkpoint mismatches, privacy, sparse intervals and traversal ceilings.
+- Root TypeScript declarations, browser fixture, installed-tarball JavaScript test, API reference and documentation are updated.
+- Source record schemas, runtime math and saved-game formats are unchanged. This implementation does **not** claim that a final digest or sparse traces can establish an exact first divergence.

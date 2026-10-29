@@ -5,6 +5,7 @@ import { synchronousResult } from "./hooks.js";
 import { createPluginRegistry } from "./plugins.js";
 import { createSeededRandom } from "./random.js";
 import { createRuleEvaluator } from "./rules.js";
+import { createRecording } from "./recording.js";
 import { createTickScheduler } from "./scheduler.js";
 import { deserializeSave, serializeSnapshot } from "./persistence.js";
 import { createSnapshotRecord, forkSnapshotRecord, validateSnapshotRecord } from "./snapshots.js";
@@ -34,6 +35,8 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
   let paused = false;
   let busy = false;
   let disposed = false;
+  let recording = null;
+  let recordingBusy = false;
   const listeners = new Set();
   const pluginRegistry = createPluginRegistry([...systems, ...plugins]);
   const events = createEventJournal({ historyLimit: eventHistoryLimit });
@@ -46,7 +49,41 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
 
   function assertMutable() {
     if (disposed) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Engine has been disposed.");
-    if (busy) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Reentrant engine mutation is unsupported.");
+    if (busy || recordingBusy) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Reentrant engine mutation is unsupported.");
+  }
+  function assertNotRecording() {
+    if (recording) throw pulseError(Error, "PULSE_RECORDING", "recording", "Stop recording before changing configuration, restoring state, or disposing the engine.");
+  }
+  function recordingLock(operation) {
+    if (busy || recordingBusy) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Recording controls are unavailable during engine operations.");
+    recordingBusy = true;
+    try { return operation(); } finally { recordingBusy = false; }
+  }
+  function startRecording({ configurationId, seed: recordingSeed = seed, sink, retainCommands = true } = {}) {
+    assertMutable();
+    assertNotRecording();
+    return recordingLock(() => {
+      const session = createRecording({ configurationId, seed: recordingSeed, initialSnapshot: captureSnapshot(),
+        initialPaused: paused, sink, retainCommands }, {
+        locked: recordingLock, release() { if (recording === session) recording = null; }
+      });
+      recording = session;
+      return session.handle;
+    });
+  }
+  function recordCommand(kind, fields, operation) {
+    assertMutable();
+    const session = recording;
+    if (!session) return operation(fields);
+    const command = recordingLock(() => session.prepare(kind, fields));
+    let result, thrown;
+    let didThrow = false;
+    try { result = operation(command); }
+    catch (error) { thrown = error; didThrow = true; }
+    try { recordingLock(() => session.complete(command, result, thrown, didThrow)); }
+    catch (error) { if (!didThrow) throw error; } // Preserve the original engine error if both fail.
+    if (didThrow) throw thrown;
+    return result;
   }
   function assertNotDisposed() {
     if (disposed) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Engine has been disposed.");
@@ -81,6 +118,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
   }
   function registerPlugin(plugin) {
     assertMutable();
+    assertNotRecording();
     const metadata = pluginRegistry.register(plugin);
     const registered = pluginRegistry.ordered().find(item => item.id === metadata.id);
     busy = true;
@@ -95,6 +133,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
   }
   function unregisterPlugin(pluginId) {
     assertMutable();
+    assertNotRecording();
     const plugin = pluginRegistry.remove(pluginId);
     if (!plugin) return false;
     busy = true;
@@ -107,7 +146,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
       randomState: random.getState(), revision, state: getState(), tick, schedules: scheduler.exportState() });
   }
   function snapshot(options) {
-    if (busy) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Checkpoints are unavailable during engine operations. Capture a checkpoint after the operation returns.");
+    if (busy || recordingBusy) throw pulseError(Error, "PULSE_LIFECYCLE", "lifecycle", "Checkpoints are unavailable during engine operations. Capture a checkpoint after the operation returns.");
     return captureSnapshot(options);
   }
   function installSnapshot(input) {
@@ -130,6 +169,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
   }
   function restore(input) {
     assertMutable();
+    assertNotRecording();
     busy = true;
     try {
       const candidate = validateSnapshotRecord(input);
@@ -261,7 +301,7 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
     return freezeData(copyData(redact(copyData({ state: getState(), tick, revision, branch, paused, schedules: scheduler.list(), plugins: pluginRegistry.list(), events: events.read(), traces: explanations }))));
   }
   function dispose() {
-    assertMutable(); busy = true;
+    assertMutable(); assertNotRecording(); busy = true;
     const errors = [];
     try { for (const plugin of [...pluginRegistry.ordered()].reverse()) {
       try { if (plugin.dispose) invoke(plugin.dispose, pluginContext(plugin.id)); } catch (error) { errors.push(error); }
@@ -278,11 +318,23 @@ export function createEngine({ initialState = {}, systems = [], plugins = [], ru
     for (const plugin of initialized.reverse()) { try { plugin.dispose?.(pluginContext(plugin.id)); } catch { /* preserve setup error */ } }
     throw error;
   } finally { busy = false; }
-  return Object.freeze({ dispatch, getState, getTick, subscribe, subscribeToEvents,
+  return Object.freeze({ dispatch: action => recordCommand("dispatch", { action }, input => dispatch(input.action)),
+    getState, getTick, subscribe, subscribeToEvents, startRecording,
     getEvents: events.read, getRandomState: random.getState, getPlugins: pluginRegistry.list,
     registerPlugin, unregisterPlugin, snapshot, restore, fork: id => forkSnapshotRecord(snapshot(), id),
-    schedule, cancelSchedule, getSchedules: scheduler.list, step, advance, pause, resume, inspect,
-    getExplanation, dispose, exportSave: () => serializeSnapshot(snapshot()),
-    importSave: (input, options) => restore(deserializeSave(input, options)) });
+    schedule: (action, options) => recordCommand("schedule", { action, options }, input => schedule(input.action, input.options)),
+    cancelSchedule: id => recordCommand("cancelSchedule", { id }, input => cancelSchedule(input.id)),
+    getSchedules: scheduler.list,
+    step: () => recordCommand("step", {}, step),
+    advance: (count = 1) => recordCommand("advance", { count }, input => advance(input.count)),
+    pause: () => recordCommand("pause", {}, pause),
+    resume: () => recordCommand("resume", {}, resume),
+    inspect, getExplanation,
+    dispose,
+    exportSave: () => serializeSnapshot(snapshot()),
+    importSave: (input, options) => {
+      if (recording || recordingBusy) { assertMutable(); assertNotRecording(); }
+      return restore(deserializeSave(input, options));
+    } });
 }
 

@@ -214,6 +214,7 @@ export interface Engine<S, A extends Action = AnyAction, E extends EventInput = 
   advance(count?: number): StepResult<S, A, E>[];
   pause(): void;
   resume(): void;
+  startRecording(options: ReplayRecordingOptions<S, A, ObservedEvent<E>>): Readonly<ReplayRecording<S, A, ObservedEvent<E>>>;
   inspect(): DeepReadonly<I> | null;
   getExplanation(actionId: string): Explanation | null;
   dispose(): unknown[];
@@ -299,3 +300,121 @@ export function createReplayRecord<S, A extends Action = AnyAction, E extends Ev
 }): DeepReadonly<ReplayRecord<S, A, E>>;
 /** Validates/detaches a replay record; does not execute or record commands. */
 export function validateReplayRecord(input: unknown): DeepReadonly<ReplayRecord>;
+
+export type RecordedReplayCommand<A extends Action = AnyAction> = ReplayCommand<A> & { outcome: ReplayOutcome };
+export type ReplayStreamEntry<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> =
+  | { readonly type: "start"; readonly record: DeepReadonly<ReplayRecord<S, A, E>> }
+  | { readonly type: "command"; readonly command: DeepReadonly<RecordedReplayCommand<A>> }
+  | { readonly type: "end"; readonly commandCount: number };
+export interface ReplayRecordingOptions<S, A extends Action, E extends EventInput> {
+  configurationId: string;
+  /** Defaults to the engine's construction seed; override after restoring a different seed. */
+  seed?: string | number;
+  retainCommands?: boolean;
+  /** Must complete synchronously. Async sinks are rejected at runtime and by this signature. */
+  sink?: (entry: ReplayStreamEntry<S, A, E>) => undefined;
+}
+export interface ReplayRecordingStatus {
+  state: "recording" | "stopped" | "failed";
+  commandCount: number;
+  retainedCommandCount: number;
+  reason: string | null;
+}
+export interface ReplayRecording<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> {
+  getStatus(): Readonly<ReplayRecordingStatus>;
+  /** Finalizes the stream and releases the engine; idempotent. Can throw on sink failure. */
+  stop(): Readonly<ReplayRecordingStatus>;
+  /** Available only after a successful stop with retainCommands enabled. */
+  getRecord(): DeepReadonly<ReplayRecord<S, A, E>>;
+}
+
+/** P03-03 — A fresh engine owned and disposed by the replay executor. */
+export type ReplayExecutionHost<S, A extends Action, E extends EventInput> = Pick<
+  Engine<S, A, E>, "restore" | "snapshot" | "dispatch" | "step" | "advance" |
+  "schedule" | "cancelSchedule" | "pause" | "resume" | "dispose"
+>;
+export interface ReplayCheckpoint<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> {
+  readonly sequence: number;
+  readonly kind: "initial" | ReplayCommand<A>["kind"];
+  readonly tick: number;
+  readonly outcome: DeepReadonly<ReplayOutcome> | null;
+  readonly snapshot: DeepReadonly<Snapshot<S, A, E>>;
+}
+export interface ReplayDivergence<A extends Action = AnyAction> {
+  readonly sequence: number;
+  readonly kind: ReplayCommand<A>["kind"];
+  readonly tick: number;
+  readonly expected: DeepReadonly<ReplayOutcome> | null;
+  readonly actual: DeepReadonly<ReplayOutcome>;
+}
+export type ReplayExecutionResult<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> =
+  | { readonly status: "completed"; readonly commandCount: number; readonly finalSnapshot: DeepReadonly<Snapshot<S, A, E>> }
+  | { readonly status: "diverged"; readonly commandCount: number; readonly divergence: ReplayDivergence<A> };
+export interface ReplayExecutionOptions<S, A extends Action, E extends EventInput> {
+  expectedConfigurationId: string;
+  createConfiguredEngine(context: Readonly<{ configurationId: string; seed: string | number }>): ReplayExecutionHost<S, A, E>;
+  onCheckpoint?(entry: ReplayCheckpoint<S, A, E>): void;
+}
+/** Executes external inputs only, verifies outcomes and disposes the created engine. */
+export function replayCommands<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput>(
+  record: unknown,
+  options: ReplayExecutionOptions<S, A, E>
+): ReplayExecutionResult<S, A, E>;
+
+/** P03-04: asynchronous SHA-256 checksum for a portable, validated checkpoint.
+ * Excludes human label, covers simulation identity; not a signature.
+ */
+export function digestCheckpoint(snapshot: unknown): Promise<`sha256-v1:${string}`>;
+
+/** P03-05: host-owned checkpoint sidecars; independent of the v1 replay format. */
+export const CHECKPOINT_TRACE_FORMAT: "pulse-checkpoint-trace";
+export const CHECKPOINT_TRACE_VERSION: 1;
+export interface CheckpointTraceEntry<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> {
+  readonly sequence: number;
+  readonly kind: "initial" | ReplayCommand<A>["kind"];
+  readonly tick: number;
+  readonly outcome: DeepReadonly<ReplayOutcome> | null;
+  readonly digest: `sha256-v1:${string}`;
+  readonly snapshot?: DeepReadonly<Snapshot<S, A, E>>;
+}
+export interface CheckpointTrace<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput> {
+  readonly format: typeof CHECKPOINT_TRACE_FORMAT;
+  readonly version: typeof CHECKPOINT_TRACE_VERSION;
+  readonly configurationId: string;
+  readonly commandCount: number;
+  readonly checkpoints: readonly CheckpointTraceEntry<S, A, E>[];
+}
+export interface CreateCheckpointTraceOptions<S, A extends Action, E extends EventInput> {
+  configurationId: string;
+  commandCount: number;
+  checkpoints: readonly ReplayCheckpoint<S, A, E>[];
+  includeSnapshots?: boolean;
+}
+export function createCheckpointTrace<S = unknown, A extends Action = AnyAction, E extends EventInput = EventInput>(
+  options: CreateCheckpointTraceOptions<S, A, E>
+): Promise<DeepReadonly<CheckpointTrace<S, A, E>>>;
+export interface TraceCompareOptions {
+  /** Requires both traces to contain snapshots; raw values are capped at 256 chars. */
+  includeValues?: boolean;
+  maximumDepth?: number;
+  maximumNodes?: number;
+}
+export type TraceComparison =
+  | { readonly status: "no-divergence"; readonly configurationId: string; readonly commandCount: number }
+  | { readonly status: "different-recordings"; readonly category: "config" | "commands"; readonly reason: string; readonly sequence?: number }
+  | { readonly status: "insufficient-trace"; readonly reason: string; readonly lastMatchedSequence: number | null }
+  | {
+      readonly status: "diverged";
+      readonly location: "initial-checkpoint" | "command";
+      readonly configurationId: string;
+      readonly firstPossibleSequence: number;
+      readonly firstObservedSequence: number;
+      readonly precision: "exact" | "interval";
+      readonly kind: "initial" | ReplayCommand["kind"];
+      readonly tick: Readonly<{ reference: number; candidate: number }>;
+      readonly category: "outcome" | "state" | "scheduler" | "random" | "events" | "metadata" | "checkpoint";
+      readonly path: string | null;
+      readonly traversalLimited: boolean;
+      readonly values?: DeepReadonly<{ reference: JsonValue; candidate: JsonValue }>;
+    };
+export function compareCheckpointTraces(reference: unknown, candidate: unknown, options?: TraceCompareOptions): TraceComparison;
