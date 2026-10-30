@@ -26,7 +26,7 @@ try {
   if (!result.ok || errors.length) throw new Error(JSON.stringify({ result, errors }));
   console.log(`${name}: native ES module import, dispatch, rules, scheduling, restore, diagnostics, recording and replay execution passed.`);
   // Exercise the actual simulator dashboard in both supported browser engines.
-  await page.goto(`http://127.0.0.1:${server.address().port}/dashboard/`);
+  await page.goto(`http://127.0.0.1:${server.address().port}/dashboard/index.html`);
   await page.waitForFunction(() => document.getElementById("status")?.dataset.kind === "success");
   if (await page.locator("#resource-value").textContent() !== "2") throw Error("Default dashboard scenario did not initialize.");
   await page.locator("#step-button").click();
