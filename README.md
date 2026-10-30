@@ -92,6 +92,16 @@ TypeScript consumers can import package-root declarations with generic state, ac
 event, system, and rule types. See the [TypeScript guide](docs/typescript.md) for
 examples, runtime validation limits, and `npm run test:types`.
 
+## Try the simulator dashboard
+
+Pulse Engine also includes a **local browser dashboard** for testing its example simulations without writing a game UI. Start it from a source checkout with:
+
+```sh
+npm run dashboard
+```
+
+Then open `http://127.0.0.1:4173/dashboard/`. Edit a scenario, step or run up to 1,000 ticks at a time, inspect resource changes and emitted events, export checkpoints, or verify that two fresh simulations produce the same SHA-256 checkpoint digest. The dashboard uses the real engine code and runs on your machine; it does not host user scenarios or accept arbitrary uploaded plug-in code. See the [dashboard guide](docs/dashboard.md) for constraints and examples.
+
 ## Use the world model
 
 The generic entity/component world is a plug-in. Consumers define what their components mean and keep their game-specific systems outside the engine.
