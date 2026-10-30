@@ -5,6 +5,7 @@ Start here to use the pre-alpha simulation engine without reading its internals.
 | Need | Page |
 | --- | --- |
 | Install and run a first scenario | [Getting started](getting-started.md) |
+| Launch the local simulation dashboard | [Simulator dashboard](dashboard.md) |
 | Look up public imports, arguments and return values | [Public API reference](public-api.md) |
 | Type-check a host application | [TypeScript consumers](typescript.md) |
 | Handle failure categories and machine-readable codes | [Structured errors](errors.md) |
