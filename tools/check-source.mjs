@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-const folders = ["src", "bin", "tools", "test"];
+const folders = ["src", "bin", "tools", "test", "dashboard"];
 for (const folder of folders) for (const name of readdirSync(folder)) {
   if (!/\.(mjs|js)$/.test(name)) continue;
   const path = `${folder}/${name}`;

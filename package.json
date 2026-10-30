@@ -27,6 +27,7 @@
     "test:types": "node tools/check-types.mjs",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/*.js --test-coverage-lines=80 --test-coverage-functions=85 --test-coverage-branches=70",
     "lint": "node tools/check-source.mjs",
+    "dashboard": "node tools/dashboard-server.mjs",
     "smoke": "node bin/pulse-run.js --scenario scenarios/resource-network.json --ticks 100",
     "check:package": "node tools/check-package.mjs"
   },
