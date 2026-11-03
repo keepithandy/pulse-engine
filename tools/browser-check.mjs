@@ -59,6 +59,15 @@ try {
   await page.waitForFunction(() => document.getElementById("tick-value")?.textContent === "0");
   state = JSON.parse(await page.locator("#state-json").textContent());
   if (state.resources.energy !== 0 || state.resources.water !== 10) throw Error("Dashboard reset did not restore the applied scenario.");
+  // Resource comparisons must keep the original baseline after the 101-point chart buffer rolls over.
+  await page.locator("#tick-count").fill("110");
+  await page.locator("#run-button").click();
+  await page.waitForFunction(() => document.getElementById("run-state")?.textContent === "COMPLETED" &&
+    document.getElementById("tick-value")?.textContent === "110");
+  if (!(await page.locator("#resources").textContent()).includes("+220 since start"))
+    throw Error("Resource delta drifted when the chart sample window rolled over.");
+  await page.locator("#reset-button").click();
+  await page.waitForFunction(() => document.getElementById("tick-value")?.textContent === "0");
   const downloadPromise = page.waitForEvent("download");
   await page.locator("#export-button").click();
   const download = await downloadPromise;
