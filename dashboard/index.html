@@ -17,7 +17,7 @@
     <main>
       <section class="heading">
         <div><p class="eyebrow">DEVELOPER TOOL / 01</p><h1>Simulation control room</h1><p class="subheading">Run real scenarios, watch state change, and verify deterministic results without editing code.</p></div>
-        <span class="version-pill">SCENARIO V1</span>
+        <div class="heading-aside"><span class="version-pill">SCENARIO V1</span><div class="session-summary" aria-label="Simulation status"><span class="session-kicker">SESSION STATUS</span><strong id="run-state" aria-live="polite">LOADING</strong><div id="run-progress" class="run-progress" role="progressbar" aria-label="Run completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="run-progress-fill"></span></div></div></div>
       </section>
       <div class="workspace">
         <aside class="sidebar" aria-label="Simulator controls">
@@ -35,7 +35,7 @@
           <section class="panel controls">
             <div class="panel-heading"><h2>Execution</h2><span class="muted-small">02 / RUN</span></div>
             <label for="tick-count">Number of ticks <span class="label-hint">1–1,000</span></label>
-            <input id="tick-count" type="number" min="1" max="1000" step="1" value="10" inputmode="numeric">
+            <input id="tick-count" type="number" min="1" max="1000" step="1" value="10" inputmode="numeric"><div class="quick-ticks" role="group" aria-label="Quick tick counts"><button type="button" class="tick-chip" data-ticks="1" aria-pressed="false">1 tick</button><button type="button" class="tick-chip" data-ticks="10" aria-pressed="true">10 ticks</button><button type="button" class="tick-chip" data-ticks="100" aria-pressed="false">100 ticks</button></div>
             <div class="button-row"><button class="button subtle" id="step-button">Step +1</button><button class="button primary" id="run-button">Run ticks</button></div>
             <button class="button stop" id="stop-button" disabled>Stop run</button>
             <div class="rule"></div>
@@ -53,7 +53,7 @@
             <div class="metric"><span>RESOURCE TYPES</span><strong id="resource-value">0</strong><small>Tracked in state</small></div>
           </section>
           <section class="panel graph-panel">
-            <div class="panel-heading"><div><h2>Resource timeline</h2><p class="panel-caption">Actual values after each engine tick · most recent 101 samples</p></div><span class="live-tag"><i aria-hidden="true"></i> LIVE</span></div>
+            <div class="panel-heading"><div><h2>Resource timeline</h2><p class="panel-caption">Actual values after each engine tick · most recent 101 samples</p></div><span class="live-tag"><i aria-hidden="true"></i> ENGINE STATE</span></div>
             <div id="resource-legend" class="legend"></div>
             <div id="chart-wrap" class="chart-wrap"><svg id="resource-chart" role="img" aria-label="Resource values across simulation ticks" viewBox="0 0 760 245" preserveAspectRatio="none"></svg><p id="chart-empty" class="empty-chart">No resources to graph.</p></div>
           </section>
