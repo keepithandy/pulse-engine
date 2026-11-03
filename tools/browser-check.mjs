@@ -29,6 +29,12 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/dashboard/index.html`);
   await page.waitForFunction(() => document.getElementById("status")?.dataset.kind === "success");
   if (await page.locator("#resource-value").textContent() !== "2") throw Error("Default dashboard scenario did not initialize.");
+  await page.locator('.tick-chip[data-ticks="100"]').click();
+  if (await page.locator("#tick-count").inputValue() !== "100" ||
+      await page.locator('.tick-chip[data-ticks="100"]').getAttribute("aria-pressed") !== "true")
+    throw Error("Quick tick shortcut did not synchronize input and pressed state.");
+  await page.locator('.tick-chip[data-ticks="10"]').click();
+  if (await page.locator("#tick-count").inputValue() !== "10") throw Error("Quick tick preset did not restore the default.");
   await page.locator("#step-button").click();
   await page.waitForFunction(() => document.getElementById("tick-value")?.textContent === "1");
   let state = JSON.parse(await page.locator("#state-json").textContent());
@@ -39,6 +45,10 @@ try {
   state = JSON.parse(await page.locator("#state-json").textContent());
   if (state.resources.energy !== 20 || state.resources.water !== 20 ||
       await page.locator("#event-value").textContent() !== "30") throw Error("Dashboard run/state/event results differ from expected scenario.");
+  await page.waitForFunction(() => document.getElementById("run-state")?.textContent === "COMPLETED");
+  if (await page.locator("#run-progress").getAttribute("aria-valuenow") !== "100" ||
+      !(await page.locator("#resources").textContent()).includes("+20 since start"))
+    throw Error("Run progress or cumulative resource change was not rendered.");
   await page.locator("#verify-button").click();
   await page.waitForFunction(() => document.getElementById("verify-result")?.dataset.result === "pass");
   await page.locator("#scenario-json").fill("{ bad json");
@@ -49,6 +59,15 @@ try {
   await page.waitForFunction(() => document.getElementById("tick-value")?.textContent === "0");
   state = JSON.parse(await page.locator("#state-json").textContent());
   if (state.resources.energy !== 0 || state.resources.water !== 10) throw Error("Dashboard reset did not restore the applied scenario.");
+  // Resource comparisons must keep the original baseline after the 101-point chart buffer rolls over.
+  await page.locator("#tick-count").fill("110");
+  await page.locator("#run-button").click();
+  await page.waitForFunction(() => document.getElementById("run-state")?.textContent === "COMPLETED" &&
+    document.getElementById("tick-value")?.textContent === "110");
+  if (!(await page.locator("#resources").textContent()).includes("+220 since start"))
+    throw Error("Resource delta drifted when the chart sample window rolled over.");
+  await page.locator("#reset-button").click();
+  await page.waitForFunction(() => document.getElementById("tick-value")?.textContent === "0");
   const downloadPromise = page.waitForEvent("download");
   await page.locator("#export-button").click();
   const download = await downloadPromise;
