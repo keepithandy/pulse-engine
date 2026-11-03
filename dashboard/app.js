@@ -4,7 +4,7 @@ const byId = id => document.getElementById(id);
 const ui = Object.fromEntries([
   "preset", "scenario-json", "seed", "tick-count", "apply-button", "reset-button",
   "step-button", "run-button", "stop-button", "verify-button", "verify-result",
-  "status", "tick-value", "entity-value", "event-value", "resource-value",
+  "status", "run-state", "run-progress", "run-progress-fill", "tick-value", "entity-value", "event-value", "resource-value",
   "resources", "events", "resource-legend", "resource-chart", "chart-empty",
   "state-json", "export-button"
 ].map(id => [id, byId(id)]));
@@ -23,6 +23,22 @@ let stopRequested = false;
 function setStatus(message, kind = "success") {
   ui.status.textContent = message;
   ui.status.dataset.kind = kind;
+  ui["run-state"].textContent = kind === "error" ? "NEEDS ATTENTION"
+    : kind === "loading" ? "LOADING"
+    : message.startsWith("Completed ") ? "COMPLETED"
+    : message.startsWith("Run stopped") ? "STOPPED" : "READY";
+}
+
+function updateRunProgress(completed, total) {
+  const percentage = total > 0 ? Math.round(completed / total * 100) : 0;
+  ui["run-progress"].setAttribute("aria-valuenow", String(percentage));
+  ui["run-progress-fill"].style.width = percentage + "%";
+}
+
+function syncQuickTicks() {
+  for (const button of document.querySelectorAll(".tick-chip")) {
+    button.setAttribute("aria-pressed", String(button.dataset.ticks === ui["tick-count"].value));
+  }
 }
 
 function setVerification(message, result = "idle") {
@@ -37,6 +53,7 @@ function errorMessage(error) {
 function setBusy(value, stoppable = false) {
   busy = value;
   canStop = stoppable;
+  if (value) ui["run-state"].textContent = stoppable ? "RUNNING" : "WORKING";
   for (const id of ["preset", "scenario-json", "seed", "tick-count", "apply-button",
     "reset-button", "step-button", "run-button", "verify-button", "export-button"]) {
     ui[id].disabled = value;
@@ -85,7 +102,7 @@ function renderChart(resources) {
     dot.className = "legend-swatch";
     dot.style.backgroundColor = palette[index % palette.length];
     const label = document.createElement("span");
-    label.textContent = name;
+    label.textContent = name + ": " + String(resources[name]);
     item.append(dot, label);
     ui["resource-legend"].append(item);
   }
@@ -150,7 +167,19 @@ function renderResources(resources) {
     label.append(dot, text);
     const value = document.createElement("strong");
     value.textContent = String(resources[name]);
-    row.append(label, value);
+    const amount = document.createElement("span");
+    amount.className = "resource-amount";
+    amount.append(value);
+    const initial = points[0]?.resources[name];
+    const current = resources[name];
+    if (Number.isFinite(initial) && Number.isFinite(current)) {
+      const delta = Number((current - initial).toFixed(3));
+      const change = document.createElement("small");
+      change.className = "resource-delta" + (delta > 0 ? " positive" : delta < 0 ? " negative" : "");
+      change.textContent = delta === 0 ? "No change" : (delta > 0 ? "+" : "") + delta + " since start";
+      amount.append(change);
+    }
+    row.append(label, amount);
     list.append(row);
   }
 }
@@ -215,6 +244,7 @@ function initializeEngine(scenario, seedOverride) {
     if (recentEvents.length > 30) recentEvents.shift();
   });
   rememberPoint();
+  updateRunProgress(0, 0);
   setVerification("Not checked yet");
   render();
   setStatus("Scenario ready. Run ticks to simulate real engine state.");
@@ -278,6 +308,7 @@ async function runTicks(count) {
   setBusy(true, true);
   stopRequested = false;
   let completed = 0;
+  updateRunProgress(0, count);
   try {
     // Yield between batches, keeping controls responsive on long runs.
     while (completed < count && !stopRequested) {
@@ -287,6 +318,7 @@ async function runTicks(count) {
         rememberPoint();
       }
       render();
+      updateRunProgress(completed, count);
       if (completed < count) await new Promise(resolve => requestAnimationFrame(resolve));
     }
     setStatus(stopRequested
@@ -358,6 +390,15 @@ function downloadCheckpoint() {
 }
 
 ui.preset.addEventListener("change", loadPreset);
+ui["tick-count"].addEventListener("input", syncQuickTicks);
+for (const button of document.querySelectorAll(".tick-chip")) {
+  button.addEventListener("click", () => {
+    if (busy) return;
+    ui["tick-count"].value = button.dataset.ticks;
+    syncQuickTicks();
+  });
+}
+syncQuickTicks();
 ui["apply-button"].addEventListener("click", applyEditor);
 ui["reset-button"].addEventListener("click", reset);
 ui["step-button"].addEventListener("click", () => runTicks(1));
