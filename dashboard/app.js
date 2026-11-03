@@ -14,6 +14,7 @@ const maxSamples = 101;
 let engine = null;
 let applied = null;
 let points = [];
+let initialResources = {};
 let recentEvents = [];
 let eventCount = 0;
 let busy = false;
@@ -59,6 +60,7 @@ function setBusy(value, stoppable = false) {
     ui[id].disabled = value;
   }
   ui["stop-button"].disabled = !stoppable;
+  for (const button of document.querySelectorAll(".tick-chip")) button.disabled = value;
 }
 
 function readTickCount() {
@@ -170,7 +172,7 @@ function renderResources(resources) {
     const amount = document.createElement("span");
     amount.className = "resource-amount";
     amount.append(value);
-    const initial = points[0]?.resources[name];
+    const initial = initialResources[name];
     const current = resources[name];
     if (Number.isFinite(initial) && Number.isFinite(current)) {
       const delta = Number((current - initial).toFixed(3));
@@ -234,6 +236,7 @@ function initializeEngine(scenario, seedOverride) {
   // Keep the existing engine alive if validation or construction fails.
   engine?.dispose();
   engine = replacement;
+  initialResources = { ...getResources(engine.getState()) };
   applied = { scenario: validation.value, seedOverride };
   recentEvents = [];
   eventCount = 0;
