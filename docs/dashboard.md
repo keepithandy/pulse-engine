@@ -21,6 +21,12 @@ Expected state: **tick 10**, **energy 20**, **water 20**. The initial state is e
 
 To experiment without writing JavaScript, change `gameData.production.energy` from `2` to `5`, click **Apply scenario**, and run 10 ticks: energy becomes **50**. The editor is intentionally restricted to JSON-safe data, and invalid input leaves the current engine alive.
 
+## Control room improvements
+
+The workspace includes **1 / 10 / 100 tick shortcuts** that synchronize with the editable count field, a session status indicator and an accessible run-progress bar. During execution, the bar advances at each responsive batch; it retains the completed percentage when execution stops. Each resource shows its absolute value and its **change since the currently applied scenario started**. The timeline legend also displays each resource's current value. Resetting or applying a scenario clears the run progress and resource comparisons.
+
+The controls, resource timeline, event stream, repeatability check and checkpoint export still operate directly against the same in-browser engine. No additional simulation systems, network services or engine API changes were introduced.
+
 ## Controls
 
 | Control | What it actually does |
@@ -28,6 +34,7 @@ To experiment without writing JavaScript, change `gameData.production.energy` fr
 | Scenario preset | Fetches bundled JSON, validates it, and creates a fresh engine |
 | Scenario JSON + Apply | Parses and validates your edited scenario, then replaces the engine only if construction succeeds |
 | Seed override | Optional deterministic seed; blank means use `scenario.seed` |
+| Tick shortcuts | Set the run count to 1, 10 or 100 without starting execution |
 | Step +1 | Calls `engine.step()` |
 | Run ticks | Calls `engine.step()` repeatedly, in responsive batches, 1–1,000 times |
 | Stop run | Cancels upcoming batches; ticks already completed remain committed |
